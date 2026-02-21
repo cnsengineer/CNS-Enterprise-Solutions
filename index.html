@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CNS : Workspace Portal 2026</title>
+    
+    <meta name="theme-color" content="#0046be">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #0f172a; --accent: #0046be; --accent-hover: #003399;
+            --bg: #f3f6fc; --header-bg: #ffffff; --text-main: #1e293b; --text-sec: #64748b;
+            --border: #e2e8f0; --card-bg: #ffffff; --card-hover: #f8fafc;
+            --success: #10b981; --warning: #f59e0b; --purple: #8b5cf6; --pink: #ec4899;
+        }
+        [data-theme="dark"] {
+            --primary: #f8fafc; --accent: #3b82f6; --accent-hover: #60a5fa;
+            --bg: #0f172a; --header-bg: #1e293b; --text-main: #f1f5f9; --text-sec: #94a3b8;
+            --border: #334155; --card-bg: #1e293b; --card-hover: #1e293b;
+        }
+        
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            font-family: 'Sarabun', sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main); 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column;
+            min-height: 100vh; 
+            transition: background 0.3s, color 0.3s; 
+        }
+
+        /* Navbar / Header */
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        .brand-container { display: flex; align-items: center; gap: 15px; }
+        .brand-icon {
+            width: 45px; height: 45px;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 1.5rem; font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 70, 190, 0.3);
+        }
+        .brand-text h1 { margin: 0; font-family: 'Prompt', sans-serif; font-size: 1.8rem; color: var(--text-main); }
+        .brand-text p { margin: 0; font-size: 1rem; color: var(--text-sec); font-weight: 500; }
+
+        .top-controls { display: flex; gap: 10px; }
+        .control-btn { 
+            background: var(--bg); border: 1px solid var(--border); 
+            padding: 8px 16px; border-radius: 30px; font-size: 0.9rem; font-weight: 700; 
+            color: var(--text-main); cursor: pointer; transition: all 0.2s; 
+            display: flex; align-items: center; gap: 8px; 
+        }
+        .control-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .welcome-section { text-align: center; margin-bottom: 4rem; animation: fadeInDown 0.6s ease; }
+        .welcome-section h2 { font-family: 'Prompt', sans-serif; font-size: 2.5rem; margin: 0 0 10px 0; color: var(--text-main); transition: color 0.3s; }
+        .welcome-section p { font-size: 1.1rem; color: var(--text-sec); margin: 0; max-width: 600px; margin: 0 auto; transition: color 0.3s; }
+
+        /* App Grid */
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            animation: fadeInUp 0.6s ease 0.2s backwards;
+        }
+
+        .app-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            text-decoration: none;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+            background: var(--card-color, var(--accent));
+            transform: scaleX(0); transform-origin: left; transition: transform 0.3s ease;
+        }
+
+        .app-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            border-color: var(--card-color, var(--accent));
+            background: var(--card-hover);
+        }
+
+        .app-card:hover::before { transform: scaleX(1); }
+
+        .app-icon-wrapper {
+            width: 60px; height: 60px;
+            border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem;
+            background: var(--icon-bg, rgba(0, 70, 190, 0.1));
+            color: var(--card-color, var(--accent));
+            transition: all 0.3s ease;
+        }
+        
+        .app-card:hover .app-icon-wrapper {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .app-info h3 { font-family: 'Prompt', sans-serif; margin: 0 0 8px 0; font-size: 1.3rem; transition: color 0.3s; }
+        .app-info p { margin: 0; font-size: 0.95rem; color: var(--text-sec); line-height: 1.5; transition: color 0.3s; }
+
+        .app-action {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 700;
+            color: var(--card-color, var(--accent));
+            font-size: 0.95rem;
+        }
+
+        .app-action i { transition: transform 0.2s; }
+        .app-card:hover .app-action i { transform: translateX(5px); }
+        
+        /* Status Badge */
+        .status-badge {
+            position: absolute; top: 1.5rem; right: 1.5rem;
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+            padding: 4px 10px; border-radius: 20px;
+        }
+        .status-ready { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .status-coming { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+
+        /* Footer */
+        footer {
+            text-align: center; padding: 2rem;
+            color: var(--text-sec); font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+            margin-top: auto;
+            transition: color 0.3s, border-color 0.3s;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 768px) {
+            header { padding: 1rem; }
+            main { padding: 2rem 1rem; }
+            .welcome-section h2 { font-size: 1.8rem; }
+            .app-grid { grid-template-columns: 1fr; }
+            .brand-text p { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand-container">
+            <img src="Logo.png" alt="Logo" style="width: 120px; height: 55px; object-fit: contain; border-radius: 8px;">
+            <div class="brand-text">
+                <h1>CNS Workspace</h1>
+                <p>Enterprise Management Suite</p>
+            </div>
+        </div>
+        <div class="top-controls">
+            <button class="control-btn" onclick="toggleTheme()" title="Toggle Dark Mode">
+                <i class="fas fa-moon" id="theme-icon"></i>
+            </button>
+            <button class="control-btn" onclick="toggleLanguage()">
+                <i class="fas fa-globe"></i> <span id="lang-label">TH</span>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div class="welcome-section">
+            <h2 data-i18n="welcome_title">ยินดีต้อนรับสู่ CNS Workspace</h2>
+            <p data-i18n="welcome_subtitle">กรุณาเลือกโปรแกรมหรือเครื่องมือที่คุณต้องการใช้งานจากรายการด้านล่าง</p>
+        </div>
+
+        <div class="app-grid">
+            
+            <!-- App 1: PDF Tools -->
+            <a href="pdf-tools.html" class="app-card" style="--card-color: #ef4444; --icon-bg: rgba(239, 68, 68, 0.1);">
+                <div class="status-badge status-ready" data-i18n="badge_ready">พร้อมใช้งาน</div>
+                <div class="app-icon-wrapper">
+                    <i class="fas fa-file-pdf"></i>
+                </div>
+                <div class="app-info">
+                    <h3 data-i18n="app1_title">PDF Tools Pro</h3>
+                    <p data-i18n="app1_desc">จัดการไฟล์ PDF ครบวงจร แปลงไฟล์, แยก, รวม, ลบหน้า, ประทับลายน้ำ และเพิ่มข้อความหรือเซ็นเอกสารดิจิทัลอิสระ</p>
+                </div>
+                <div class="app-action">
+                    <span data-i18n="btn_launch">เปิดใช้งาน</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <!-- App 2: QR & Barcode Generator -->
+            <a href="qr-barcode.html" class="app-card" style="--card-color: #8b5cf6; --icon-bg: rgba(139, 92, 246, 0.1);">
+                <div class="status-badge status-ready" data-i18n="badge_ready">พร้อมใช้งาน</div>
+                <div class="app-icon-wrapper">
+                    <i class="fas fa-qrcode"></i>
+                </div>
+                <div class="app-info">
+                    <h3 data-i18n="app2_title">QR & Barcode Generator</h3>
+                    <p data-i18n="app2_desc">ระบบสร้างคิวอาร์โค้ดและบาร์โค้ดสำหรับงานธุรกิจ ปรับแต่งสีและใส่โลโก้ได้</p>
+                </div>
+                <div class="app-action">
+                    <span data-i18n="btn_launch">เปิดใช้งาน</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <!-- App 3: Image Studio (Placeholder) -->
+            <a href="#" class="app-card" style="--card-color: #3b82f6; --icon-bg: rgba(59, 130, 246, 0.1);">
+                <div class="status-badge status-coming" data-i18n="badge_soon">เร็วๆ นี้</div>
+                <div class="app-icon-wrapper">
+                    <i class="fas fa-image"></i>
+                </div>
+                <div class="app-info">
+                    <h3 data-i18n="app3_title">Image Studio</h3>
+                    <p data-i18n="app3_desc">เครื่องมือจัดการรูปภาพ ปรับแต่งขนาด, ครอป, ลดขนาดไฟล์ และแปลงนามสกุลรูปภาพ</p>
+                </div>
+                <div class="app-action">
+                    <span data-i18n="btn_launch">เปิดใช้งาน</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2026 CNS Computer Co., Ltd. All rights reserved.<br>
+        <span style="color: var(--accent); font-weight: 600;">Developed by MaRcH WoRaWiT</span>
+    </footer>
+
+    <script>
+        // --- Language i18n Dictionary ---
+        const i18n = {
+            th: {
+                welcome_title: "ยินดีต้อนรับสู่ CNS Workspace",
+                welcome_subtitle: "กรุณาเลือกโปรแกรมหรือเครื่องมือที่คุณต้องการใช้งานจากรายการด้านล่าง",
+                badge_ready: "พร้อมใช้งาน",
+                badge_soon: "เร็วๆ นี้",
+                btn_launch: "เปิดใช้งานโปรแกรม",
+                
+                app1_title: "PDF Tools Pro",
+                app1_desc: "จัดการไฟล์ PDF ครบวงจร แปลงไฟล์, แยก, รวม, ลบหน้า, ประทับลายน้ำ และเพิ่มข้อความหรือเซ็นเอกสารดิจิทัลอิสระ",
+
+                app2_title: "QR & Barcode Generator",
+                app2_desc: "ระบบสร้างคิวอาร์โค้ดและบาร์โค้ดสำหรับงานธุรกิจ ปรับแต่งสี ใส่โลโก้ และสร้างจำนวนมากๆ ได้รวดเร็ว",
+                
+                app3_title: "Image Studio (เร็วๆ นี้)",
+                app3_desc: "เครื่องมือจัดการรูปภาพ ปรับขนาด, ครอป, ลดขนาดไฟล์รูปภาพ และแปลงนามสกุลรูปภาพแบบรวดเร็ว"
+            },
+            en: {
+                welcome_title: "Welcome to CNS Workspace",
+                welcome_subtitle: "Please select an application or tool you would like to use from the suite below.",
+                badge_ready: "Available",
+                badge_soon: "Coming Soon",
+                btn_launch: "Launch App",
+                
+                app1_title: "PDF Tools Pro",
+                app1_desc: "All-in-one PDF management. Convert, split, merge, delete pages, watermark, add text and digital signature.",
+
+                app2_title: "QR & Barcode Generator",
+                app2_desc: "Generate QR codes and barcodes for business. Customize colors, add logos, and bulk generate.",
+                
+                app3_title: "Image Studio",
+                app3_desc: "Image management tools. Resize, crop, compress, and convert image formats quickly."
+            }
+        };
+
+        // --- Current State Variables ---
+        let curLang = 'th';
+        
+        // --- Initialization ---
+        function init() {
+            // Restore Language
+            try { 
+                const s = localStorage.getItem('cns_lang'); 
+                if(s && ['th','en'].includes(s)) curLang = s; 
+            } catch(e) {}
+            applyLanguage();
+
+            // Restore Theme
+            try {
+                if(localStorage.getItem('cns_theme') === 'dark') {
+                    document.body.setAttribute('data-theme', 'dark');
+                    document.getElementById('theme-icon').className = 'fas fa-sun';
+                }
+            } catch(e) {}
+        }
+
+        // --- Core Functions ---
+        function applyLanguage() {
+            const btn = document.getElementById('lang-label'); 
+            if(btn) btn.textContent = curLang.toUpperCase();
+            
+            document.querySelectorAll('[data-i18n]').forEach(el => { 
+                const k = el.getAttribute('data-i18n'); 
+                if(i18n[curLang][k]) el.textContent = i18n[curLang][k]; 
+            });
+        }
+
+        function toggleLanguage() { 
+            curLang = curLang === 'th' ? 'en' : 'th'; 
+            try { localStorage.setItem('cns_lang', curLang); } catch(e) {} 
+            applyLanguage(); 
+        }
+
+        function toggleTheme() { 
+            const d = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; 
+            document.body.setAttribute('data-theme', d); 
+            document.getElementById('theme-icon').className = d === 'dark' ? 'fas fa-sun' : 'fas fa-moon'; 
+            try { localStorage.setItem('cns_theme', d); } catch(e) {} 
+        }
+
+        // Prevent default on "Coming Soon" links
+        document.querySelectorAll('a[href="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                alert(curLang === 'th' ? 'โปรแกรมนี้กำลังอยู่ระหว่างการพัฒนา กรุณารอติดตามในเวอร์ชันหน้าครับ' : 'This application is currently under development. Stay tuned for the next update!');
+            });
+        });
+
+        // Run Init
+        window.onload = init;
+    </script>
+</body>
+</html>

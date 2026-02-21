@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CNS : Generator Tools 2026</title>
+    
+    <meta name="theme-color" content="#0046be">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" type="image/png" href="favicon.png">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        // Save the DOM-based QRCode library (for UI display) to a safe variable
+        window.DOMQRCode = window.QRCode;
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
+    <script>
+        // Save the Node-style QRCode library (for Excel export) to a safe variable
+        window.HeadlessQRCode = window.QRCode;
+        // Restore the original DOMQRCode to window.QRCode so existing tools work
+        window.QRCode = window.DOMQRCode;
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- CSS Design System --- */
+        :root {
+            --primary: #0f172a; --accent: #0046be; --accent-hover: #003399;
+            --bg: #f3f6fc; --sidebar-bg: #ffffff; --text-main: #1e293b; --text-sec: #64748b;
+            --border: #e2e8f0; --card-bg: #ffffff; --input-bg: #ffffff;
+            --drop-bg: #f8fafc; --drop-border: #cbd5e1;
+            --success: #10b981; --danger: #ef4444; --warning: #f59e0b; 
+            --sidebar-width: 280px;
+        }
+        [data-theme="dark"] {
+            --primary: #f8fafc; --accent: #3b82f6; --accent-hover: #60a5fa;
+            --bg: #0f172a; --sidebar-bg: #1e293b; --text-main: #f1f5f9; --text-sec: #94a3b8;
+            --border: #334155; --card-bg: #1e293b; --input-bg: #334155;
+            --drop-bg: #0f172a; --drop-border: #475569;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Sarabun', sans-serif; background: var(--bg); color: var(--text-main); margin: 0; display: flex; height: 100vh; overflow: hidden; transition: background 0.3s, color 0.3s; }
+        
+        /* Top Controls */
+        .top-controls { position: fixed; top: 20px; right: 20px; z-index: 1100; display: flex; gap: 10px; }
+        .control-btn { background: var(--card-bg); border: 2px solid var(--border); padding: 8px 16px; border-radius: 30px; font-size: 0.9rem; font-weight: 700; color: var(--text-main); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .control-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+
+        /* Sidebar */
+        aside { 
+            width: var(--sidebar-width); background: var(--sidebar-bg); border-right: 1px solid var(--border); 
+            display: flex; flex-direction: column; padding: 1.5rem 1rem; 
+            box-shadow: 2px 0 15px rgba(0,0,0,0.03); z-index: 900; transition: transform 0.3s ease; 
+            height: 100vh;
+        }
+        .brand { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .brand-logo { max-width: 160px; height: auto; margin-bottom: 15px; display: block; object-fit: contain; transition: transform 0.3s; }
+        .brand-logo:hover { transform: scale(1.05); }
+        .program-name { font-size: 1.2rem; font-weight: 800; color: var(--accent); margin: 0; }
+        .company-name { font-size: 0.75rem; color: var(--text-sec); margin-top: 5px; font-weight: 500; }
+
+        nav { flex: 1; overflow-y: auto; margin-top: 10px; padding-right: 5px; padding-bottom: 40px; }
+        nav::-webkit-scrollbar { width: 4px; }
+        nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        .nav-group-title { font-size: 0.75rem; color: var(--text-sec); font-weight: 700; margin: 15px 0 5px 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        nav button { width: 100%; text-align: left; padding: 12px 15px; margin-bottom: 4px; border: none; background: none; border-radius: 8px; color: var(--text-sec); cursor: pointer; font-family: 'Sarabun', sans-serif; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 12px; transition: background-color 0.2s, color 0.2s; }
+        nav button:hover { background: var(--bg); color: var(--accent); }
+        nav button.active { background: rgba(0, 70, 190, 0.08); color: var(--accent); font-weight: 700; border-left: 4px solid var(--accent); }
+        [data-theme="dark"] nav button.active { background: rgba(59, 130, 246, 0.15); }
+        nav button i { width: 24px; text-align: center; font-size: 1.1rem; }
+        
+        .dev-info { margin-top: auto; font-size: 0.7rem; color: var(--text-sec); text-align: center; border-top: 1px solid var(--border); padding-top: 1rem; line-height: 1.6; flex-shrink: 0; }
+
+        /* Main Content */
+        main { flex: 1; padding: 2rem; overflow-y: auto; position: relative; }
+        .tool-panel { display: none; max-width: 900px; margin: 0 auto; animation: fadeIn 0.4s ease; padding-bottom: 60px; }
+        .tool-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        .panel-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--border); padding-bottom: 15px; margin-bottom: 1.5rem; }
+        .panel-header h2 { color: var(--accent); margin: 0; display: flex; align-items: center; gap: 12px; font-size: 1.5rem; }
+        .tool-desc { color: var(--text-sec); margin: 5px 0 0 0; font-size: 0.95rem; }
+
+        .btn-reset { background: transparent; color: var(--text-sec); border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 5px; }
+        .btn-reset:hover { border-color: var(--danger); color: var(--danger); background: rgba(239, 68, 68, 0.1); }
+
+        /* --- CARD & PREVIEW --- */
+        .card { 
+            background: var(--card-bg); border-radius: 12px; padding: 2rem; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border); 
+            transition: background 0.3s;
+            display: flex; flex-direction: column;
+            min-height: 720px;
+        }
+        .preview-zone { 
+            border: 2px dashed var(--drop-border); border-radius: 10px; padding: 2rem; 
+            text-align: center; background-color: var(--drop-bg); margin-bottom: 1.5rem;
+            min-height: 280px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .preview-zone img, .preview-zone canvas { 
+            max-width: 100%; height: auto; padding: 10px; background: white; 
+            border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+        }
+
+        /* --- LOGO UPLOADER --- */
+        .logo-uploader { text-align: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+        .logo-label { cursor: pointer; color: var(--accent); display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.95rem; padding: 8px 16px; border-radius: 20px; background: rgba(0, 70, 190, 0.05); transition: all 0.2s; }
+        .logo-label:hover { background: rgba(0, 70, 190, 0.1); transform: translateY(-1px); }
+        .logo-name { font-size: 0.85rem; color: var(--text-sec); display: block; margin-top: 5px; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-main); font-size: 0.9rem; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: 'Sarabun', sans-serif; outline: none; transition: border 0.2s; font-size: 0.95rem; background: var(--input-bg); color: var(--text-main); }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0, 70, 190, 0.1); }
+        .form-group input:disabled { background-color: var(--drop-bg); color: var(--text-sec); cursor: not-allowed; }
+
+        .checkbox-wrapper { display: flex; align-items: center; gap: 10px; cursor: pointer; color: var(--text-main); font-size: 0.95rem; margin-top: 5px; user-select: none; }
+        .checkbox-wrapper input { width: 18px; height: 18px; margin: 0; cursor: pointer; }
+
+        .pass-display { font-family: monospace; font-size: 1.5rem; font-weight: 700; color: var(--accent); background: var(--drop-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border); text-align: center; letter-spacing: 2px; margin-bottom: 20px; word-break: break-all; }
+
+        /* --- BULK TOOL CSS --- */
+        .instruction-box { background: rgba(0, 70, 190, 0.05); border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid rgba(0, 70, 190, 0.1); }
+        .instruction-title { font-weight: 700; color: var(--accent); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .step-list { margin: 0; padding-left: 20px; color: var(--text-sec); font-size: 0.95rem; line-height: 1.6; }
+        .step-list li { margin-bottom: 5px; }
+        
+        .upload-zone { border: 2px dashed var(--accent); border-radius: 10px; padding: 3rem 2rem; text-align: center; background-color: var(--drop-bg); cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; margin-bottom: 1rem; }
+        .upload-zone:hover, .upload-zone.dragover { background-color: rgba(0, 70, 190, 0.08); transform: scale(1.01); }
+        .upload-icon { font-size: 3rem; color: var(--accent); }
+        .upload-text { font-size: 1.1rem; font-weight: 600; color: var(--text-main); }
+        .upload-sub { font-size: 0.9rem; color: var(--text-sec); }
+        
+        .preview-container { margin-top: 20px; overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; display: none; }
+        .bulk-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .bulk-table th { background: var(--drop-bg); color: var(--text-main); font-weight: 700; text-align: left; padding: 12px; border-bottom: 2px solid var(--border); white-space: nowrap; }
+        .bulk-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-sec); vertical-align: middle; }
+        
+        .progress-container { margin-top: 20px; display: none; }
+        .progress-bar-bg { width: 100%; height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.2s; }
+        .progress-text { text-align: center; font-size: 0.9rem; margin-top: 5px; color: var(--text-main); }
+
+        /* --- ACTION FOOTER --- */
+        .action-footer { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border); }
+        .btn-action { width: 100%; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%); color: #fff; padding: 15px; border: none; border-radius: 10px; font-size: 1.05rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s; font-family: 'Sarabun', sans-serif; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 70, 190, 0.3); }
+        .btn-action:disabled { background: var(--text-sec); cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); font-weight: 600; padding: 10px; display:flex; align-items:center; cursor:pointer; gap:8px; border-radius:8px;}
+        .btn-outline:hover { background: var(--drop-bg); border-color: var(--accent); color: var(--accent); }
+
+        .privacy-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.1); color: var(--success); padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; margin-top: 1rem; width: fit-content; border: 1px solid rgba(16, 185, 129, 0.2); }
+        
+        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast { pointer-events: auto; background: var(--card-bg); color: var(--text-main); padding: 14px 20px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); display: flex; align-items: center; gap: 12px; animation: slideUp 0.3s; border-left: 5px solid var(--accent); min-width: 280px; font-weight: 600; font-size: 0.95rem; }
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--danger); }
+        
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Responsive */
+        @media (max-width: 768px) { 
+            .menu-toggle { display: block; } 
+            aside { position: fixed; top: 0; left: 0; height: 100%; transform: translateX(-100%); box-shadow: 10px 0 20px rgba(0,0,0,0.1); } 
+            aside.open { transform: translateX(0); } 
+            main { padding: 5rem 1rem 2rem 1rem; } 
+            .card { min-height: auto; padding: 1.5rem; } 
+            .grid-2 { grid-template-columns: 1fr; gap: 1rem; } 
+            .top-controls { top: 15px; right: 15px; } 
+            .control-btn { padding: 6px 12px; } 
+            .menu-overlay.active { display: block; } 
+        }
+        
+        .menu-toggle { display: none; position: fixed; top: 20px; left: 20px; z-index: 1001; background: var(--accent); color: #fff; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .menu-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 800; backdrop-filter: blur(2px); }
+        ::-webkit-scrollbar { width: 8px; height: 8px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--drop-border); border-radius: 4px; } ::-webkit-scrollbar-thumb:hover { background: var(--text-sec); }
+
+        /* --- PRINT MODE --- */
+        @media print {
+            aside, .top-controls, .panel-header button, .btn-action, .btn-outline, 
+            .form-group, .privacy-badge, .menu-toggle, #toast-container, .tool-desc, .nav-group-title, .action-footer, .logo-uploader { display: none !important; }
+            body, main { background: white; color: black; padding: 0; margin: 0; height: auto; overflow: visible; }
+            .card { box-shadow: none; border: none; padding: 0; margin: 0; min-height: auto; }
+            .preview-zone { border: none; background: transparent; padding: 0; min-height: auto; margin: 0 auto; }
+            .tool-panel { display: none; }
+            .tool-panel.active { display: block; text-align: center; }
+            .panel-header { border: none; justify-content: center; margin-bottom: 20px; }
+            .panel-header h2 { font-size: 2rem; color: black; }
+            .preview-zone img, .preview-zone canvas { max-width: 100%; width: 350px !important; height: auto !important; box-shadow: none; border: 1px solid #ddd; }
+            .pass-display { border: 2px solid black; color: black; background: white; }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <div class="menu-overlay" onclick="toggleSidebar()"></div>
+    
+    <div class="top-controls">
+        <button class="control-btn" onclick="window.location.href='index.html'" title="Back to Home"><i class="fas fa-home"></i></button>
+        <button class="control-btn" onclick="toggleTheme()" title="Toggle Dark Mode"><i class="fas fa-moon" id="theme-icon"></i></button>
+        <button class="control-btn" onclick="toggleLanguage()"><i class="fas fa-globe"></i> <span id="lang-label">TH</span></button>
+    </div>
+
+    <aside id="sidebar">
+        <div class="brand" style="cursor: pointer;" onclick="window.location.href='index.html'" title="Back to Home">
+            <img src="Logo.png" alt="Logo" class="brand-logo" onerror="this.style.display='none';">
+            <h1 class="program-name">CNS : Generator Tools</h1>
+            <p class="company-name">CNS Computer Co., Ltd.</p>
+        </div>
+        <nav>
+            <div class="nav-group-title" data-i18n="grp_gen">Generators</div>
+            <button class="active" onclick="switchTab('promptpay', this)"><i class="fas fa-hand-holding-dollar"></i> <span data-i18n="menu_pp">Thai PromptPay</span></button>
+            <button onclick="switchTab('qr', this)"><i class="fas fa-qrcode"></i> <span data-i18n="menu_qr">QR Code</span></button>
+            <button onclick="switchTab('vcard', this)"><i class="fas fa-address-card"></i> <span data-i18n="menu_vcard">VCard</span></button>
+            <button onclick="switchTab('location', this)"><i class="fas fa-map-marked-alt"></i> <span data-i18n="menu_loc">Location (Map)</span></button>
+            <button onclick="switchTab('event', this)"><i class="fas fa-calendar-check"></i> <span data-i18n="menu_event">Event (Calendar)</span></button>
+            <button onclick="switchTab('password', this)"><i class="fas fa-key"></i> <span data-i18n="menu_pass">Password Gen</span></button>
+            <button onclick="switchTab('barcode', this)"><i class="fas fa-barcode"></i> <span data-i18n="menu_barcode">Barcode Maker</span></button>
+            <button onclick="switchTab('wifi', this)"><i class="fas fa-wifi"></i> <span data-i18n="menu_wifi">WiFi QR</span></button>
+            
+            <div class="nav-group-title" data-i18n="grp_bulk">Batch Processing</div>
+            <button onclick="switchTab('bulk', this)"><i class="fas fa-file-excel"></i> <span data-i18n="menu_bulk">Bulk QR Excel</span></button>
+        </nav>
+        <div class="dev-info">© 2026 CNS Computer Co., Ltd.<br><span style="color: var(--accent); font-weight: 600;">Developed by MaRcH WoRaWiT</span></div>
+    </aside>
+
+    <main>
+        <div id="promptpay" class="tool-panel active">
+            <div class="panel-header"><div><h2><i class="fas fa-hand-holding-dollar"></i> <span data-i18n="title_pp">Thai PromptPay</span></h2><p class="tool-desc" data-i18n="desc_pp">สร้าง QR รับเงินมาตรฐานไทย (พร้อมเพย์)</p></div><button class="btn-reset" onclick="resetTool('promptpay')"><i class="fas fa-redo"></i> <span data-i18n="btn_reset">Reset</span></button></div>
+            <div class="card">
+                <div class="preview-zone" id="dz-promptpay"><div id="pp-qrcode"></div><span style="margin-top:10px; font-size:0.9rem; color:var(--text-sec);" data-i18n="hint_preview">ตัวอย่าง QR Code จะแสดงที่นี่</span></div>
+                <div class="logo-uploader"><label class="logo-label" onclick="document.getElementById('pp-logo').click()"><i class="fas fa-image"></i> <span data-i18n="lbl_logo_add">คลิกเพื่อใส่โลโก้ตรงกลาง</span></label><input type="file" id="pp-logo" accept="image/*" onchange="debouncedPP()" style="display:none;"><span id="pp-logo-name" class="logo-name"></span></div>
+                
+                <div class="form-group">
+                    <label data-i18n="lbl_acc_type">ประเภทบัญชี (Account Type)</label>
+                    <select id="pp-type" onchange="updatePPPlaceholder(); debouncedPP();">
+                        <option value="mobile">📱 เบอร์มือถือ (Mobile 0xx...)</option>
+                        <option value="id">🆔 บัตรประชาชน (National ID 13 digits)</option>
+                        <option value="wallet">💰 E-Wallet (15 digits)</option>
+                    </select>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group"><label data-i18n="lbl_pp_id">เลขบัญชี / เบอร์โทร</label><input type="tel" id="pp-id" oninput="debouncedPP()" placeholder="08x-xxx-xxxx"></div>
+                    <div class="form-group"><label data-i18n="lbl_pp_amount">จำนวนเงิน (บาท)</label><input type="number" id="pp-amount" oninput="debouncedPP()" step="0.01" placeholder="0.00"></div>
+                </div>
+                <div class="action-footer"><div class="grid-2" style="margin-top: 0;"><button class="btn-action btn-outline" onclick="attemptCopy('pp-qrcode')"><i class="fas fa-copy"></i> <span data-i18n="btn_copy">คัดลอกรูป</span></button><button class="btn-action" onclick="downloadImage('pp-qrcode', 'PromptPay')"><i class="fas fa-download"></i> <span data-i18n="btn_download">ดาวน์โหลด</span></button></div></div>
+            </div>
+        </div>
+
+        <div id="qr" class="tool-panel">
+            <div class="panel-header"><div><h2><i class="fas fa-qrcode"></i> <span data-i18n="title_qr">QR Code</span></h2><p class="tool-desc" data-i18n="desc_qr">สร้าง QR Code จากข้อความหรือลิ้งก์</p></div><button class="btn-reset" onclick="resetTool('qr')"><i class="fas fa-redo"></i> <span data-i18n="btn_reset">Reset</span></button></div>
+            <div class="card">
+                <div class="preview-zone" id="dz-qr"><div id="qrcode"></div></div>
+                <div class="logo-uploader"><label class="logo-label" onclick="document.getElementById('qr-logo').click()"><i class="fas fa-image"></i> <span data-i18n="lbl_logo_add">คลิกเพื่อใส่โลโก้ตรงกลาง</span></label><input type="file" id="qr-logo" accept="image/*" onchange="debouncedQR()" style="display:none;"><span id="qr-logo-name" class="logo-name"></span></div>
+                
+                <div class="form-group">
+                    <label data-i18n="lbl_data_type">ประเภทข้อมูล (Data Type)</label>
+                    <select id="qr-type" onchange="updateQRPlaceholder(); debouncedQR();">
+                        <option value="text">🔤 ข้อความ / URL (Text)</option>
+                        <option value="url">🌐 เว็บไซต์ (Website URL)</option>
+                        <option value="tel">📞 เบอร์โทร (Tel/Call)</option>
+                        <option value="sms">💬 ส่งข้อความ (SMS)</option>
+                        <option value="email">📧 ส่งอีเมล (Email)</option>
+                    </select>
+                </div>
+
+                <div class="form-group"><label data-i18n="lbl_text">ข้อความ / ข้อมูล</label><input type="text" id="qr-text" oninput="debouncedQR()" placeholder="https://www.example.com"></div>
+                <div class="grid-2">
+                    <div class="form-group"><label data-i18n="lbl_size">ขนาด (px)</label><input type="number" id="qr-size" value="250" oninput="debouncedQR()" step="10" min="50"></div>
+                    <div class="form-group"><label data-i18n="lbl_color">สี</label><input type="color" id="qr-color" value="#000000" style="height:48px; width:100%;" oninput="debouncedQR()"></div>
+                </div>
+                <div class="action-footer"><div class="grid-2" style="margin-top: 0;"><button class="btn-action btn-outline" onclick="attemptCopy('qrcode')"><i class="fas fa-copy"></i> <span data-i18n="btn_copy">คัดลอกรูป</span></button><button class="btn-action" onclick="downloadImage('qrcode', 'QR')"><i class="fas fa-download"></i> <span data-i18n="btn_download">ดาวน์โหลด</span></button></div></div>
+            </div>
+        </div>
+
+        <div id="vcard" class="tool-panel">
+            <div class="panel-header"><div><h2><i class="fas fa-address-card"></i> <span data-i18n="title_vcard">VCard (Business Card)</span></h2><p class="tool-desc" data-i18n="desc_vcard">สร้าง QR นามบัตรดิจิทัล สำหรับสแกนเข้ามือถือ</p></div><button class="btn-reset" onclick="resetTool('vcard')"><i class="fas fa-redo"></i> <span data-i18n="btn_reset">Reset</span></button></div>
+            <div class="card">
+                <div class="preview-zone" id="dz-vcard"><div id="vcard-qrcode"></div></div>
+                <div class="logo-uploader"><label class="logo-label" onclick="document.getElementById('vcard-logo').click()"><i class="fas fa-image"></i> <span data-i18n="lbl_logo_add">คลิกเพื่อใส่โลโก้ตรงกลาง</span></label><input type="file" id="vcard-logo" accept="image/*" onchange="debouncedVCard()" style="display:none;"><span id="vcard-logo-name" class="logo-name"></span></div>
+                
+                <div class="grid-2">
+                    <div class="form-group"><label data-i18n="lbl_fname">ชื่อจริง (First Name)</label><input type="text" id="vc-fname" oninput="debouncedVCard()" placeholder="Somchai"></div>
+                    <div class="form-group"><label data-i18n="lbl_lname">นามสกุล (Last Name)</label><input type="text" id="vc-lname" oninput="debouncedVCard()" placeholder="Jaidee"></div>
+                </div>
+                
+                <div class="grid-2">
+                    <div class="form-group"><label data-i18n="lbl_org">บริษัท (Company)</label><input type="text" id="vc-org" oninput="debouncedVCard()" placeholder="CNS Computer"></div>
+                    <div class="form-group"><label data-i18n="lbl_title">ตำแหน่ง (Job Title)</label><input type="text" id="vc-title" oninput="debouncedVCard()" placeholder="Manager"></div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group"><label data-i18n="lbl_tel">เบอร์มือถือ (Mobile)</label><input type="tel" id="vc-tel" oninput="debouncedVCard()" placeholder="081-234-5678"></div>
+                    <div class="form-group"><label data-i18n="lbl_email">อีเมล (Email)</label><input type="email" id="vc-email" oninput="debouncedVCard()" placeholder="email@example.com"></div>
+                </div>
+                
+                <div class="form-group"><label data-i18n="lbl_website">เว็บไซต์ (Website)</label><input type="url" id="vc-url" oninput="debouncedVCard()" placeholder="www.example.com"></div>
+                <div class="form-group"><label data-i18n="lbl_address">ที่อยู่ (Address)</label><textarea id="vc-adr" oninput="debouncedVCard()" placeholder="123 Sukhumvit Rd..."></textarea></div>
+                <div class="form-group"><label data-i18n="lbl_note">หมายเหตุ (Note)</label><textarea id="vc-note" oninput="debouncedVCard()" placeholder="Line ID: @cns, FB: CNS Page..."></textarea></div>
+                
+                <div class="action-footer"><div class="grid-2" style="margin-top: 0;"><button class="btn-action btn-outline" onclick="attemptCopy('vcard-qrcode')"><i class="fas fa-copy"></i> <span data-i18n="btn_copy">คัดลอกรูป</span></button><button class="btn-action" onclick="downloadImage('vcard-qrcode', 'VCard')"><i class="fas fa-download"></i> <span data-i18n="btn_download">ดาวน์โหลด</span></button></div></div>
+            </div>
+        </div>
+
+        <div id="location" class="tool-panel">
+            <div class="panel-header"><div><h2><i class="fas fa-map-marked-alt"></i> <span data-i18n="title_loc">Location Map</span></h2><p class="tool-desc" data-i18n="desc_loc">สร้าง QR พิกัดแผนที่ (Google Maps)</p></div><button class="btn-reset" onclick="resetTool('location')"><i class="fas fa-redo"></i> <span data-i18n="btn_reset">Reset</span></button></div>
+            <div class="card">
+                <div class="preview-zone" id="dz-loc"><div id="loc-qrcode"></div></div>
+                <div class="logo-uploader"><label class="logo-label" onclick="document.getElementById('loc-logo').click()"><i class="fas fa-image"></i> <span data-i18n="lbl_logo_add">คลิกเพื่อใส่โลโก้ตรงกลาง</span></label><input type="file" id="loc-logo" accept="image/*" onchange="generateLocation()" style="display:none;"><span id="loc-logo-name" class="logo-name"></span></div>
+                <button class="btn-action btn-outline" onclick="getLocation()" style="margin-bottom:15px; margin-top:0;"><i class="fas fa-location-arrow"></i> <span data-i18n="btn_get_loc">ดึงพิกัดปัจจุบัน (GPS)</span></button>
+                <div class="grid-2">
+                    <div class="form-group"><label>Latitude</label><input type="number" id="loc-lat" oninput="generateLocation()" placeholder="13.7563" step="any"></div>
+                    <div class="form-group"><label>Longitude</label><input type="number" id="loc-long" oninput="generateLocation()" placeholder="100.5018" step="any"></div>
+                </div>
+                <p style="font-size:0.85rem; color:var(--text-sec); text-align:center;">* สแกนแล้วจะเปิดแอป Google Maps นำทางทันที</p>
+                <div class="action-footer"><div class="grid-2" style="margin-top: 0;"><button class="btn-action btn-outline" onclick="attemptCopy('loc-qrcode')"><i class="fas fa-copy"></i> <span data-i18n="btn_copy">คัดลอกรูป</span></button><button class="btn-action" onclick="downloadImage('loc-qrcode', 'Location')"><i class="fas fa-download"></i> <span data-i18n="btn_download">ดาวน์โหลด</span></button></div></div>
+            </div>
+        </div>
+
+        <div id="event" class="tool-panel">
+            <div class="panel-header"><div><h2><i class="fas fa-calendar-check"></i> <span data-i18n="title_event">Event Calendar</span></h2><p class="tool-desc" data-i18n="desc_event">สร้าง QR นัดหมาย / ลงปฏิทิน (iCalendar)</p></div><button class="btn-reset" onclick="resetTool('event')"><i class="fas fa-redo"></i> <span data-i18n="btn_reset">Reset</span></button></div>
+            <div class="card">
+                <div class="preview-zone" id="dz-event"><div id="event-qrcode"></div></div>
+                <div class="logo-uploader"><label class="logo-label" onclick="document.getElementById('evt-logo').click()"><i class="fas fa-image"></i> <span data-i18n="lbl_logo_add">คลิกเพื่อใส่โลโก้ตรงกลาง</span></label><input type="file" id="evt-logo" accept="image/*" onchange="generateEvent()" style="display:none;"><span id="evt-logo-name" class="logo-name"></span></div>
+                <div class="form-group"><label data-i18n="lbl_evt_title">ชื่องาน / การประชุม</label><input type="text" id="evt-title" oninput="generateEvent()" placeholder="Meeting"></div>
+                <div class="grid-2">
+                    <div class="form-group"><label data-i18n="lbl_evt_start">เริ่ม (Start)</label><input type="datetime-local" id="evt-start" oninput="generateEvent()" style="width:100%;"></div>
+                    <div class="form-group"><label data-i18n="lbl_evt_end">สิ้นสุด (End)</label><input type="datetime-local" id="evt-end" oninput="generateEvent()" style="width:100%;"></div>
+                </div>
+                <div class="form-group"><label data-i18n="lbl_evt_loc">สถานที่</label><input type="text" id="evt-loc" oninput="generateEvent()" placeholder="Meeting Room 1"></div>
+                <div class="form-group"><label data-i18n="lbl_note">รายละเอียด / หมายเหตุ (Description)</label><textarea id="evt-desc" oninput="generateEvent()" placeholder="Agenda details..."></textarea></div>
+                <div class="action-footer"><div class="grid-2" style="margin-top: 0;"><button class="btn-action btn-outline" onclick="attemptCopy('event-qrcode')"><i class="fas fa-copy"></i> <span data-i18n="btn_copy">คัดลอกรูป</span></button><button class="btn-action" onclick="downloadImage('event-qrcode', 'Event')"><i class="fas fa-download"></i> <span data-i18n="btn_download">ดาวน์โหลด</span></button></div></div>
+            </div>
+        </div>
+
+        <div id="password" class="tool-panel">
+            <div class="panel-header"><div><h2><i class="fas fa-key"></i> <span data-i18n="title_pass">Password Gen</span></h2><p class="tool-desc" data-i18n="desc_pass">สุ่มรหัสผ่านความปลอดภัยสูง</p></div><button class="btn-reset" onclick="resetTool('password')"><i class="fas fa-redo"></i> <span data-i18n="btn_reset">Reset</span></button></div>
+            <div class="card">
+                <div class="pass-display" id="pass-result" onclick="copyPassText()" title="Click to Copy" style="cursor:pointer; transition:all 0.2s;">...</div>
+                <div style="text-align:center; font-size:0.8rem; color:var(--text-sec); margin-top:-15px; margin-bottom:20px;">(คลิกที่รหัสเพื่อคัดลอก)</div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                         <label data-i18n="lbl_pass_len">ความยาว: <span id="len-val" style="color:var(--accent)">12</span></label>
+                         <input type="range" id="pass-len" min="6" max="32" value="12" oninput="document.getElementById('len-val').innerText=this.value; generatePass();">
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-wrapper"><input type="checkbox" id="pass-upper" checked onchange="generatePass()"> A-Z (ตัวใหญ่)</label>
+                        <label class="checkbox-wrapper"><input type="checkbox" id="pass-lower" checked onchange="generatePass()"> a-z (ตัวเล็ก)</label>
+                        <label class="checkbox-wrapper"><input type="checkbox" id="pass-num" checked onchange="generatePass()"> 0-9 (ตัวเลข)</label>
+                        <label class="checkbox-wrapper"><input type="checkbox" id="pass-sym" checked onchange="generatePass()"> @#$ (สัญลักษณ์)</label>
+                        <label class="checkbox-wrapper" style="color:var(--text-sec); border-top:1px solid var(--border); padding-top:5px; margin-top:5px;"><input type="checkbox" id="pass-amb" onchange="generatePass()"> <span data-i18n="lbl_pass_amb">ตัดตัวอักษรสับสน (No Ambiguous)</span></label>
+                    </div>
+                </div>
+                <button class="btn-action" onclick="generatePass()" style="margin-top:10px;"><i class="fas fa-sync-alt"></i> <span data-i18n="btn_regen">สุ่มใหม่ (Regenerate)</span></button>
+                <div style="margin-top:20px; border-top:1px dashed var(--border); padding-top:20px;">
+                    <h4 style="margin:0 0 10px 0; color:var(--text-sec); text-align:center;" data-i18n="lbl_pass_qr">QR สำหรับสแกนเข้ามือถือ</h4>
+                    <div class="preview-zone" id="dz-pass" style="min-height:180px;"><div id="pass-qrcode"></div></div>
+                </div>
+                <div class="action-footer"><div class="grid-2" style="margin-top: 0;"><button class="btn-action btn-outline" onclick="copyPassText()"><i class="fas fa-copy"></i> Copy Text</button><button class="btn-action" onclick="downloadImage('pass-qrcode', 'PasswordQR')"><i class="fas fa-download"></i> Save QR</button></div></div>
+            </div>
+        </div>
+
+        <div id="barcode" class="tool-panel">
+            <div class="panel-header"><div><h2><i class="fas fa-barcode"></i> <span data-i18n="title_bc">Barcode Maker</span></h2><p class="tool-desc" data-i18n="desc_bc">สร้างบาร์โค้ดสินค้า / รหัสครุภัณฑ์</p></div><button class="btn-reset" onclick="resetTool('barcode')"><i class="fas fa-redo"></i> <span data-i18n="btn_reset">Reset</span></button></div>
+            <div class="card">
+                <div class="preview-zone" id="dz-barcode" style="min-height: 200px; display:flex; align-items:center; justify-content:center;">
+                    <canvas id="barcode-canvas"></canvas>
+                    <div id="barcode-error" style="color:var(--danger); display:none; font-weight:bold;"><i class="fas fa-exclamation-triangle"></i> ข้อมูลไม่ถูกต้อง (Invalid Data)</div>
+                </div>
+                
+                <div class="form-group">
+                    <label data-i18n="lbl_code">รหัส / ตัวเลข (Data)</label>
+                    <input type="text" id="bc-text" oninput="debouncedBar()" placeholder="CNS-2026-01">
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label data-i18n="lbl_format">รูปแบบ (Format)</label>
+                        <select id="bc-format" onchange="debouncedBar()">
+                            <option value="CODE128">Code 128 (ทั่วไป)</option>
+                            <option value="EAN13">EAN-13 (สินค้าปลีก)</option>
+                            <option value="UPC">UPC (12 หลัก)</option>
+                            <option value="CODE39">Code 39 (อุตสาหกรรม)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="lbl_show_text">แสดงตัวเลข</label>
+                        <select id="bc-display" onchange="debouncedBar()">
+                            <option value="true">แสดง (Show)</option>
+                            <option value="false">ซ่อน (Hide)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>ความสูง (Height): <span id="val-bc-h" style="color:var(--accent)">100</span>px</label>
+                        <input type="range" id="bc-height" min="10" max="150" value="100" oninput="document.getElementById('val-bc-h').innerText=this.value; debouncedBar();" style="width:100%;">
+                    </div>
+                    <div class="form-group">
+                        <label>ความหนา (Width): <span id="val-bc-w" style="color:var(--accent)">2</span>px</label>
+                        <input type="range" id="bc-width" min="1" max="4" value="2" oninput="document.getElementById('val-bc-w').innerText=this.value; debouncedBar();" style="width:100%;">
+                    </div>
+                </div>
+
+                <div class="action-footer"><div class="grid-2" style="margin-top: 0;"><button class="btn-action btn-outline" onclick="attemptCopy('barcode-canvas')"><i class="fas fa-copy"></i> <span data-i18n="btn_copy">คัดลอกรูป</span></button><button class="btn-action" onclick="downloadImage('barcode-canvas', 'Barcode')"><i class="fas fa-download"></i> <span data-i18n="btn_download">ดาวน์โหลด</span></button></div></div>
+            </div>
+        </div>
+
+        <div id="wifi" class="tool-panel">
+            <div class="panel-header"><div><h2><i class="fas fa-wifi"></i> <span data-i18n="title_wifi">WiFi QR</span></h2><p class="tool-desc" data-i18n="desc_wifi">QR เชื่อมต่อ WiFi อัตโนมัติ</p></div><button class="btn-reset" onclick="resetTool('wifi')"><i class="fas fa-redo"></i> <span data-i18n="btn_reset">Reset</span></button></div>
+            <div class="card">
+                <div class="preview-zone" id="dz-wifi"><div id="wifi-qrcode"></div></div>
+                <div class="logo-uploader"><label class="logo-label" onclick="document.getElementById('wifi-logo').click()"><i class="fas fa-image"></i> <span data-i18n="lbl_logo_add">คลิกเพื่อใส่โลโก้ตรงกลาง</span></label><input type="file" id="wifi-logo" accept="image/*" onchange="generateWifi()" style="display:none;"><span id="wifi-logo-name" class="logo-name"></span></div>
+                <div class="grid-2">
+                    <div class="form-group"><label data-i18n="lbl_ssid">ชื่อ WiFi (SSID)</label><input type="text" id="wifi-ssid" oninput="generateWifi()" placeholder="MyOffice_5G"></div>
+                    <div class="form-group"><label data-i18n="lbl_security">ความปลอดภัย</label><select id="wifi-type" onchange="generateWifi()"><option value="WPA">WPA/WPA2 (มาตรฐาน)</option><option value="SAE">WPA3 (ใหม่ล่าสุด)</option><option value="WEP">WEP</option><option value="nopass">ไม่มีรหัสผ่าน (Open)</option></select></div>
+                </div>
+                <div class="form-group"><label data-i18n="lbl_pass">รหัสผ่าน</label><input type="text" id="wifi-pass" oninput="generateWifi()" placeholder="Password"></div>
+                <div class="form-group"><label class="checkbox-wrapper"><input type="checkbox" id="wifi-hidden" onchange="generateWifi()"> <span data-i18n="lbl_hidden">เครือข่ายที่ซ่อนชื่อ (Hidden SSID)</span></label></div>
+                <div class="action-footer"><div class="grid-2" style="margin-top: 0;"><button class="btn-action btn-outline" onclick="attemptCopy('wifi-qrcode')"><i class="fas fa-copy"></i> <span data-i18n="btn_copy">คัดลอกรูป</span></button><button class="btn-action" onclick="downloadImage('wifi-qrcode', 'WiFi')"><i class="fas fa-download"></i> <span data-i18n="btn_download">ดาวน์โหลด</span></button></div></div>
+            </div>
+        </div>
+
+        <div id="bulk" class="tool-panel">
+            <div class="panel-header">
+                <div><h2><i class="fas fa-file-excel"></i> <span data-i18n="title_bulk">Bulk QR Generator</span></h2><p class="tool-desc" data-i18n="desc_bulk">สร้าง QR Code จำนวนมากจากไฟล์แนบ พร้อมส่งออกเป็น Excel</p></div>
+                <button class="btn-reset" onclick="resetTool('bulk')"><i class="fas fa-redo"></i> <span data-i18n="btn_reset">เริ่มใหม่</span></button>
+            </div>
+            <div class="card">
+                <div class="instruction-box" id="bulk-instructions">
+                    <div class="instruction-title"><i class="fas fa-book"></i> <span data-i18n="lbl_instruction">คู่มือการใช้งาน (Instructions)</span></div>
+                    <ul class="step-list">
+                        <li data-i18n="step_1">1. เตรียมไฟล์ Excel (.xlsx) ที่มีข้อมูลใน Column A</li>
+                        <li data-i18n="step_2">2. อัปโหลดไฟล์ที่เตรียมไว้ลงในช่องด้านล่าง</li>
+                        <li data-i18n="step_3">3. ตั้งค่ารูปแบบ และกดปุ่ม 'สร้างและดาวน์โหลด'</li>
+                    </ul>
+                </div>
+
+                <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                    <input type="file" id="file-input" accept=".xlsx, .xls, .csv, .txt" style="display:none;" onchange="handleFileSelect(this.files[0])">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <div><div class="upload-text" data-i18n="lbl_drop">คลิก หรือ ลากไฟล์มาวางที่นี่</div><div class="upload-sub" data-i18n="lbl_support">รองรับ Excel (.xlsx), CSV, หรือ Text File (.txt)</div></div>
+                </div>
+
+                <div id="settings-area" style="display:none;">
+                    <div style="margin-bottom:15px; display:flex; gap:10px;">
+                        <span class="privacy-badge" style="margin-top:0;"><i class="fas fa-file-alt"></i> <span id="file-name-display">filename.xlsx</span></span>
+                        <span class="privacy-badge" style="margin-top:0;"><i class="fas fa-list-ol"></i> <span id="row-count-display">0 rows</span></span>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label data-i18n="lbl_col">เลือกคอลัมน์ข้อมูล (Column)</label>
+                            <select id="col-select" onchange="updatePreview()"><option value="0">Column A / Text Line</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>ระดับความทนทาน (ECC Level)</label>
+                            <select id="bulk-ecc" onchange="updatePreview()">
+                                <option value="L">L (7%)</option>
+                                <option value="M" selected>M (15%)</option>
+                                <option value="Q">Q (25%)</option>
+                                <option value="H">H (30%)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>คำนำหน้า (Prefix) <small style="color:var(--text-sec); font-weight:400;">(เช่น https://)</small></label>
+                            <input type="text" id="bulk-prefix" placeholder="ว่างไว้หากไม่ต้องการ" oninput="updatePreview()">
+                        </div>
+                        <div class="form-group">
+                            <label>คำต่อท้าย (Suffix)</label>
+                            <input type="text" id="bulk-suffix" placeholder="ว่างไว้หากไม่ต้องการ" oninput="updatePreview()">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top:1.5rem;">
+                        <label>สี QR / พื้นหลัง (Color / Background)</label>
+                        <div style="display:flex; gap:10px;">
+                            <input type="color" id="bulk-color-dark" value="#000000" style="flex:1; height:45px; cursor:pointer;" onchange="updatePreview()" title="QR Color">
+                            <input type="color" id="bulk-color-light" value="#ffffff" style="flex:1; height:45px; cursor:pointer;" onchange="updatePreview()" title="Background Color">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-top:1.5rem;">
+                        <label>ชื่อไฟล์ผลลัพธ์ (ไม่ต้องใส่ .xlsx)</label>
+                        <input type="text" id="bulk-filename" placeholder="CNS_Result">
+                    </div>
+
+                    <h4 style="margin-top:20px; color:var(--text-main); display:flex; align-items:center; gap:8px;">
+                        <i class="fas fa-eye"></i> <span data-i18n="lbl_preview">ตัวอย่างข้อมูล (5 รายการแรก)</span>
+                    </h4>
+                    <div class="preview-container" style="display:block;">
+                        <table id="preview-table" class="bulk-table"><thead><tr><th>No.</th><th>Data & Final URL</th><th>QR Preview</th></tr></thead><tbody></tbody></table>
+                    </div>
+
+                    <div class="progress-container" id="progress-container"><div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div><div class="progress-text" id="progress-text">Processing 0/0...</div></div>
+                    <div class="action-footer"><button class="btn-action" id="btn-process" onclick="processAndDownload()"><i class="fas fa-cogs"></i> <span data-i18n="btn_process">สร้างและดาวน์โหลด Excel</span></button></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="toast-container"></div>
+
+    <script>
+        const i18n = {
+            th: {
+                grp_gen: "Generators", grp_bulk: "Batch Processing",
+                menu_pp: "QR รับเงิน (PromptPay)", menu_qr: "QR Code", menu_vcard: "VCard (นามบัตร)", menu_loc: "Location (แผนที่)", menu_event: "Event (นัดหมาย)", menu_pass: "Password (รหัสผ่าน)", menu_barcode: "Barcode Maker", menu_wifi: "WiFi QR", menu_bulk: "QR จากไฟล์ (Bulk Excel)",
+                title_pp: "PromptPay Generator", desc_pp: "สร้าง QR รับเงินมาตรฐานไทย",
+                title_qr: "QR Code Generator", desc_qr: "สร้าง QR Code ทั่วไป",
+                title_vcard: "VCard Generator", desc_vcard: "สร้าง QR นามบัตรดิจิทัล",
+                title_loc: "Location Map QR", desc_loc: "สร้าง QR พิกัด Google Maps",
+                title_event: "Event Calendar QR", desc_event: "สร้าง QR นัดหมายลงปฏิทิน",
+                title_pass: "Password Generator", desc_pass: "สุ่มรหัสผ่านความปลอดภัยสูง",
+                title_bc: "Barcode Maker", desc_bc: "สร้างบาร์โค้ดสินค้า / ครุภัณฑ์",
+                title_wifi: "WiFi QR Code", desc_wifi: "QR เชื่อมต่อ WiFi",
+                title_bulk: "Bulk QR Generator", desc_bulk: "สร้าง QR Code จำนวนมากจากไฟล์แนบ พร้อมส่งออกเป็น Excel",
+                lbl_logo_add: "+ คลิกเพื่อใส่โลโก้ตรงกลาง",
+                lbl_pp_id: "เลขบัญชี / เบอร์โทร", lbl_pp_amount: "จำนวนเงิน (บาท)", lbl_acc_type: "ประเภทบัญชี",
+                lbl_text: "ข้อความ / URL", lbl_size: "ขนาด (px)", lbl_color: "สี", lbl_data_type: "ประเภทข้อมูล",
+                lbl_fname: "ชื่อจริง", lbl_lname: "นามสกุล", lbl_org: "บริษัท / องค์กร", lbl_title: "ตำแหน่ง",
+                lbl_tel: "เบอร์มือถือ", lbl_email: "อีเมล", lbl_website: "เว็บไซต์", lbl_address: "ที่อยู่ (Address)", lbl_note: "หมายเหตุ (Note)",
+                lbl_evt_title: "ชื่องาน / การประชุม", lbl_evt_start: "เริ่ม (Start)", lbl_evt_end: "สิ้นสุด (End)", lbl_evt_loc: "สถานที่",
+                lbl_pass_len: "ความยาว:", lbl_pass_qr: "QR สำหรับสแกนเข้ามือถือ", lbl_pass_amb: "ตัดตัวอักษรสับสน (No Ambiguous)",
+                lbl_code: "รหัส / ตัวเลข", lbl_format: "รูปแบบ", lbl_show_text: "แสดงตัวเลข",
+                lbl_ssid: "ชื่อ WiFi (SSID)", lbl_security: "ความปลอดภัย", lbl_pass: "รหัสผ่าน",
+                lbl_hidden: "เครือข่ายที่ซ่อนชื่อ (Hidden SSID)", hint_preview: "ตัวอย่าง QR Code จะแสดงที่นี่",
+                opt_wpa: "WPA/WPA2 (มาตรฐาน)", opt_wpa3: "WPA3 (ใหม่ล่าสุด)", opt_nopass: "ไม่มีรหัสผ่าน (Open)",
+                btn_copy: "คัดลอกรูป", btn_download: "ดาวน์โหลด", btn_reset: "ล้างค่า", btn_regen: "สุ่มใหม่ (Regenerate)", btn_get_loc: "ดึงพิกัดปัจจุบัน (GPS)",
+                msg_copy_ok: "คัดลอกรูปเรียบร้อย", msg_copy_text_ok: "คัดลอกข้อความแล้ว", msg_copy_fail: "Browser ไม่รองรับ (กรุณาใช้ปุ่มดาวน์โหลด)",
+                msg_offline: "ไม่สามารถโหลด Libraries ได้ กรุณาเชื่อมต่ออินเทอร์เน็ต",
+                // Bulk Tool
+                lbl_instruction: "คู่มือการใช้งาน (Instructions)", step_1: "1. เตรียมไฟล์ Excel (.xlsx) ที่มีข้อมูลใน Column A", step_2: "2. อัปโหลดไฟล์ที่เตรียมไว้ลงในช่องด้านล่าง", step_3: "3. ตั้งค่ารูปแบบ และกดปุ่ม 'สร้างและดาวน์โหลด'", 
+                lbl_drop: "คลิก หรือ ลากไฟล์มาวางที่นี่", lbl_support: "รองรับ Excel (.xlsx), CSV, หรือ Text File (.txt)", lbl_col: "เลือกคอลัมน์ข้อมูลที่จะทำ QR", lbl_preview: "ตัวอย่างข้อมูล (5 แถวแรก)", btn_process: "สร้างและดาวน์โหลด Excel", msg_load_ok: "อ่านไฟล์เรียบร้อย", msg_process_start: "กำลังประมวลผล กรุณารอสักครู่...", msg_complete: "เสร็จสิ้น! กำลังดาวน์โหลด", msg_error: "เกิดข้อผิดพลาดในการอ่านไฟล์", msg_no_data: "ไม่พบข้อมูลในไฟล์"
+            },
+            en: {
+                grp_gen: "Generators", grp_bulk: "Batch Processing",
+                menu_pp: "Thai PromptPay", menu_qr: "QR Code", menu_vcard: "VCard", menu_loc: "Location", menu_event: "Event", menu_pass: "Password", menu_barcode: "Barcode", menu_wifi: "WiFi QR", menu_bulk: "Bulk QR from File",
+                title_pp: "PromptPay Generator", desc_pp: "Thai Standard Payment QR",
+                title_qr: "QR Code Generator", desc_qr: "Generate QR from Text/URL",
+                title_vcard: "VCard Generator", desc_vcard: "Digital Business Card QR",
+                title_loc: "Location Map QR", desc_loc: "Google Maps Coordinate QR",
+                title_event: "Event Calendar QR", desc_event: "Calendar Appointment QR",
+                title_pass: "Password Generator", desc_pass: "Secure Random Password",
+                title_bc: "Barcode Maker", desc_bc: "Create Product Barcodes",
+                title_wifi: "WiFi QR Code", desc_wifi: "Instant WiFi Connect",
+                title_bulk: "Bulk QR Generator", desc_bulk: "Convert codes/text from Excel/Text file to QR Codes instantly",
+                lbl_logo_add: "+ Add Center Logo",
+                lbl_pp_id: "ID / Mobile Number", lbl_pp_amount: "Amount (THB)", lbl_acc_type: "Account Type",
+                lbl_text: "Text / URL", lbl_size: "Size (px)", lbl_color: "Color", lbl_data_type: "Data Type",
+                lbl_fname: "First Name", lbl_lname: "Last Name", lbl_org: "Company", lbl_title: "Job Title",
+                lbl_tel: "Mobile", lbl_email: "Email", lbl_website: "Website", lbl_address: "Address", lbl_note: "Note",
+                lbl_evt_title: "Event Title", lbl_evt_start: "Start", lbl_evt_end: "End", lbl_evt_loc: "Location",
+                lbl_pass_len: "Length:", lbl_pass_qr: "Scan to Mobile", lbl_pass_amb: "No Ambiguous Characters",
+                lbl_code: "Code / Number", lbl_format: "Format", lbl_show_text: "Show Text",
+                lbl_ssid: "WiFi Name (SSID)", lbl_security: "Security", lbl_pass: "Password",
+                lbl_hidden: "Hidden Network (Hidden SSID)", hint_preview: "QR Preview will appear here",
+                opt_wpa: "WPA/WPA2 (Standard)", opt_wpa3: "WPA3 (Latest)", opt_nopass: "No Password (Open)",
+                btn_copy: "Copy Image", btn_download: "Download", btn_reset: "Reset", btn_regen: "Regenerate", btn_get_loc: "Get My Location",
+                msg_copy_ok: "Copied successfully", msg_copy_text_ok: "Text copied", msg_copy_fail: "Copy not supported, please Download",
+                msg_offline: "Cannot load libraries. Please check internet.",
+                // Bulk Tool
+                lbl_instruction: "Instructions", step_1: "1. Prepare Excel file with data in Column A", step_2: "2. Upload your file below", step_3: "3. Configure settings and click 'Generate & Download'",
+                lbl_drop: "Click or Drop file here", lbl_support: "Supports Excel (.xlsx), CSV, or Text File (.txt)", lbl_col: "Select Data Column", lbl_preview: "Data Preview (First 5 rows)", btn_process: "Generate & Download Excel", msg_load_ok: "File loaded successfully", msg_process_start: "Processing... Please wait", msg_complete: "Done! Downloading...", msg_error: "Error reading file", msg_no_data: "No data found"
+            }
+        };
+
+        let curLang = localStorage.getItem('cns_gen_lang') || 'th';
+        let debounceTimer;
+
+        // Bulk Globals
+        let globalData = [];
+        let excelHeader = [];
+        let isExcel = false;
+
+        // --- UI FUNCTIONS ---
+        function applyLanguage(){
+            document.getElementById('lang-label').innerText = curLang.toUpperCase();
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const k = el.getAttribute('data-i18n');
+                if(i18n[curLang][k]) el.innerText = i18n[curLang][k];
+            });
+            const phMap = { 
+                'evt-title': {th: 'งานประชุมประจำปี', en: 'Annual Meeting'}, 
+                'evt-loc': {th: 'ห้องประชุม 1', en: 'Conference Room 1'},
+                'evt-desc': {th: 'รายละเอียดวาระการประชุม...', en: 'Agenda details...'}
+            };
+            for(const id in phMap) { const el = document.getElementById(id); if(el) el.placeholder = phMap[id][curLang]; }
+            updatePPPlaceholder();
+            updateQRPlaceholder();
+        }
+        function toggleLanguage() { curLang = curLang === 'th' ? 'en' : 'th'; localStorage.setItem('cns_gen_lang', curLang); applyLanguage(); if(document.querySelector('.tool-panel.active').id==='barcode') generateBarcode(); }
+        function toggleTheme() {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            const newTheme = isDark ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', newTheme);
+            document.getElementById('theme-icon').className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            localStorage.setItem('cns_gen_theme', newTheme);
+        }
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.querySelector('.menu-overlay').classList.toggle('active'); }
+        function switchTab(id, btn) {
+            document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+            if(window.innerWidth <= 768) toggleSidebar();
+        }
+        function toast(m, type='success'){ const c=document.getElementById('toast-container'), e=document.createElement('div'); e.className=`toast ${type}`; e.innerHTML=`<i class="fas fa-${type==='success'?'check-circle':'exclamation-circle'}"></i><span>${m}</span>`; c.appendChild(e); setTimeout(()=>e.remove(),3000); }
+        
+        function resetTool(id) {
+            if(id === 'bulk') {
+                document.getElementById('settings-area').style.display = 'none';
+                document.getElementById('drop-zone').style.display = 'flex';
+                const inst = document.getElementById('bulk-instructions');
+                if(inst) inst.style.display = 'block';
+                document.getElementById('file-input').value = ''; 
+                document.getElementById('progress-container').style.display = 'none';
+                document.getElementById('btn-process').disabled = false;
+                globalData = []; excelHeader = [];
+                document.querySelector('#preview-table tbody').innerHTML = ''; 
+                document.getElementById('row-count-display').innerText = '0 rows';
+                toast(i18n[curLang].btn_reset);
+                return;
+            }
+            document.querySelectorAll(`#${id} input:not([type=range])`).forEach(i => i.value = '');
+            document.querySelectorAll(`#${id} textarea`).forEach(i => i.value = '');
+            document.querySelectorAll(`#${id} input[type=checkbox]`).forEach(i => i.checked = true);
+            if(id === 'qr') { document.getElementById('qr-size').value = 250; document.getElementById('qr-color').value = '#000000'; document.getElementById('qr-type').value = 'text'; updateQRPlaceholder(); generateQR(); }
+            if(id === 'promptpay') { document.getElementById('pp-type').value = 'mobile'; updatePPPlaceholder(); generatePromptPay(); }
+            if(id === 'vcard') generateVCard();
+            if(id === 'location') generateLocation();
+            if(id === 'event') generateEvent();
+            if(id === 'password') { document.getElementById('pass-len').value=12; document.getElementById('len-val').innerText="12"; document.getElementById('pass-amb').checked=false; generatePass(); }
+            if(id === 'barcode') { document.getElementById('bc-height').value = 100; document.getElementById('val-bc-h').innerText = "100"; document.getElementById('bc-width').value = 2; document.getElementById('val-bc-w').innerText = "2"; generateBarcode(); }
+            if(id === 'wifi') { document.getElementById('wifi-type').value = 'WPA'; document.getElementById('wifi-hidden').checked = false; generateWifi(); }
+            document.querySelectorAll(`#${id} span[id$="-logo-name"]`).forEach(s => s.innerText = "");
+            toast(i18n[curLang].btn_reset);
+        }
+
+        // --- DEBOUNCE & LOGIC ---
+        function debouncedPP() { clearTimeout(debounceTimer); debounceTimer = setTimeout(generatePromptPay, 300); }
+        function debouncedQR() { clearTimeout(debounceTimer); debounceTimer = setTimeout(generateQR, 300); }
+        function debouncedVCard() { clearTimeout(debounceTimer); debounceTimer = setTimeout(generateVCard, 300); }
+        function debouncedBar() { clearTimeout(debounceTimer); debounceTimer = setTimeout(generateBarcode, 300); }
+        function escapeWifi(str) { if (!str) return ""; return str.replace(/([\\;:,\"])/g, '\\$1'); }
+        function formatDate(d) { return d ? d.replace(/[-:]/g, "") + "00" : ""; }
+
+        function updatePPPlaceholder() {
+            const type = document.getElementById("pp-type").value;
+            const ph = { 'mobile': '08x-xxx-xxxx', 'id': '1-xxxx-xxxxx-xx-x', 'wallet': '14000-xxxx-xxxxx (15 Digits)' };
+            document.getElementById("pp-id").placeholder = ph[type];
+        }
+
+        function updateQRPlaceholder() {
+            const type = document.getElementById("qr-type").value;
+            const ph = { 'text': 'ข้อความ / Text', 'url': 'www.example.com', 'tel': '08x-xxx-xxxx', 'sms': '08x-xxx-xxxx', 'email': 'name@example.com' };
+            document.getElementById("qr-text").placeholder = ph[type] || '...';
+        }
+
+        function generatePromptPay() {
+            if(typeof QRCode === 'undefined') return;
+            const c = document.getElementById("pp-qrcode"); c.innerHTML = "";
+            const type = document.getElementById("pp-type").value;
+            let target = document.getElementById("pp-id").value.replace(/[^0-9]/g, '');
+            let amount = document.getElementById("pp-amount").value;
+            let ppPayload = "";
+            
+            if(!target) {
+                ppPayload = "00020101021129370016A000000677010111011300668999999995802TH53037646304"; 
+            } else {
+                let targetTag = "";
+                if (type === 'mobile') { if(target.startsWith('0')) target = target.substring(1); targetTag = "0016A00000067701011101130066" + target; } 
+                else if (type === 'id') { targetTag = "0016A0000006770101110213" + target; } 
+                else if (type === 'wallet') { targetTag = "0016A0000006770101110315" + target; }
+                const data = ["000201", "0102" + (amount ? "12" : "11"), "29" + ("00" + targetTag.length).slice(-2) + targetTag, "5802TH", "5303764"];
+                if(amount && !isNaN(parseFloat(amount))) { let amtStr = parseFloat(amount).toFixed(2); data.push("54" + ("00" + amtStr.length).slice(-2) + amtStr); }
+                let rawData = data.join("") + "6304"; ppPayload = rawData + calcCRC16(rawData);
+            }
+            try { new QRCode(c, { text: ppPayload, width: 250, height: 250, correctLevel: QRCode.CorrectLevel.H }); handleLogo('pp', c); } catch(e) {}
+        }
+
+        function generateQR() {
+            const c = document.getElementById("qrcode"); c.innerHTML = "";
+            const type = document.getElementById("qr-type").value;
+            let val = document.getElementById("qr-text").value;
+            let txt = val || "CNS_TOOLS_PREVIEW";
+            if (val) {
+                if (type === 'url' && !val.startsWith('http')) txt = 'https://' + val;
+                else if (type === 'tel') txt = 'tel:' + val;
+                else if (type === 'sms') txt = 'smsto:' + val;
+                else if (type === 'email') txt = 'mailto:' + val;
+            }
+            try { new QRCode(c, { text: txt, width: parseInt(document.getElementById("qr-size").value)||250, height: parseInt(document.getElementById("qr-size").value)||250, colorDark: document.getElementById("qr-color").value, correctLevel: QRCode.CorrectLevel.H }); handleLogo('qr', c); } catch(e) {}
+        }
+
+        function generateVCard() {
+            const c = document.getElementById("vcard-qrcode"); 
+            if (!c) return;
+            c.innerHTML = "";
+            let fname = document.getElementById("vc-fname").value || "Name";
+            let lname = document.getElementById("vc-lname").value || "Surname";
+            let org = document.getElementById("vc-org").value;
+            let title = document.getElementById("vc-title").value;
+            let tel = document.getElementById("vc-tel").value;
+            let email = document.getElementById("vc-email").value;
+            let url = document.getElementById("vc-url").value;
+            let adr = document.getElementById("vc-adr").value;
+            let note = document.getElementById("vc-note").value;
+            
+            let vcard = `BEGIN:VCARD\nVERSION:3.0\nN;CHARSET=UTF-8:${lname};${fname};;;\nFN;CHARSET=UTF-8:${fname} ${lname}\nORG;CHARSET=UTF-8:${org}\nTITLE;CHARSET=UTF-8:${title}\nTEL;TYPE=CELL:${tel}\nEMAIL:${email}\nURL:${url}\nADR;TYPE=WORK;CHARSET=UTF-8:;;${adr.replace(/\n/g, ", ")};;;\nNOTE;CHARSET=UTF-8:${note}\nEND:VCARD`;
+            
+            try { 
+                new QRCode(c, { 
+                    text: vcard, 
+                    width: 250, 
+                    height: 250, 
+                    correctLevel: QRCode.CorrectLevel.L // Low for max data capacity
+                }); 
+                handleLogo('vcard', c); 
+            } catch(e) { c.innerHTML = "<span style='color:red; font-size:0.8rem;'>Data overflow</span>"; }
+        }
+
+        function generateLocation() {
+            const c = document.getElementById("loc-qrcode"); c.innerHTML = "";
+            let lat = document.getElementById("loc-lat").value || "13.7563";
+            let long = document.getElementById("loc-long").value || "100.5018";
+            let link = `https://www.google.com/maps?q=${lat},${long}`;
+            try { new QRCode(c, { text: link, width: 250, height: 250, correctLevel: QRCode.CorrectLevel.H }); handleLogo('loc', c); } catch(e) {}
+        }
+        
+        function getLocation() {
+            if (navigator.geolocation) {
+                const btn = document.querySelector("button[onclick='getLocation()'] span");
+                const oldText = btn.innerText;
+                btn.innerText = "Locating...";
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        document.getElementById("loc-lat").value = position.coords.latitude.toFixed(6);
+                        document.getElementById("loc-long").value = position.coords.longitude.toFixed(6);
+                        generateLocation();
+                        btn.innerText = oldText;
+                        toast(i18n[curLang].msg_copy_ok.replace('คัดลอกรูปเรียบร้อย', 'ดึงพิกัดเรียบร้อย').replace('Copied successfully', 'Location Found'));
+                    },
+                    (error) => { alert("Error: " + error.message); btn.innerText = oldText; }, { enableHighAccuracy: true }
+                );
+            } else { alert("Geolocation not supported"); }
+        }
+
+        function generateEvent() {
+            const c = document.getElementById("event-qrcode"); c.innerHTML = "";
+            let title = document.getElementById("evt-title").value || "Meeting";
+            let start = document.getElementById("evt-start").value;
+            let end = document.getElementById("evt-end").value;
+            let loc = document.getElementById("evt-loc").value || "";
+            let desc = document.getElementById("evt-desc").value.replace(/\n/g, "\\n") || "";
+            if(!start) { const now = new Date(); start = now.toISOString().slice(0,16); }
+            if(!end) { const next = new Date(); next.setHours(next.getHours()+1); end = next.toISOString().slice(0,16); }
+
+            let ical = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:${title}\nDTSTART:${formatDate(start)}\nDTEND:${formatDate(end)}\nLOCATION:${loc}\nDESCRIPTION:${desc}\nEND:VEVENT\nEND:VCALENDAR`;
+            try { new QRCode(c, { text: ical, width: 250, height: 250, correctLevel: QRCode.CorrectLevel.H }); handleLogo('evt', c); } catch(e) {}
+        }
+
+        function generatePass() {
+            const len = parseInt(document.getElementById("pass-len").value);
+            const useAmb = document.getElementById("pass-amb").checked;
+            const raw = { upper: "ABCDEFGHIJKLMNOPQRSTUVWXYZ", lower: "abcdefghijklmnopqrstuvwxyz", num: "0123456789", sym: "!@#$%^&*()_+~`|}{[]:;?><,./-=" };
+            const noAmb = { upper: "ABCDEFGHJKLMNPQRSTUVWXYZ", lower: "abcdefghijkmnopqrstuvwxyz", num: "23456789", sym: "!@#$%^&*()_+~`|}{[]:;?><,./-=" };
+            const set = useAmb ? noAmb : raw;
+            let pool = "";
+            let guarantee = "";
+            const pick = (str) => str.charAt(Math.floor(Math.random() * str.length));
+
+            if(document.getElementById("pass-upper").checked) { pool += set.upper; guarantee += pick(set.upper); }
+            if(document.getElementById("pass-lower").checked) { pool += set.lower; guarantee += pick(set.lower); }
+            if(document.getElementById("pass-num").checked)   { pool += set.num;   guarantee += pick(set.num); }
+            if(document.getElementById("pass-sym").checked)   { pool += set.sym;   guarantee += pick(set.sym); }
+            
+            if(pool === "") { document.getElementById("pass-result").innerText = "Select Options"; document.getElementById("pass-qrcode").innerHTML = ""; return; }
+            
+            let pass = guarantee;
+            for(let i=guarantee.length; i<len; i++) pass += pick(pool);
+            pass = pass.split('').sort(() => 0.5 - Math.random()).join('');
+            
+            const display = document.getElementById("pass-result");
+            display.innerText = pass;
+            display.style.transform = "scale(1.05)"; setTimeout(() => display.style.transform = "scale(1)", 100);
+            
+            const c = document.getElementById("pass-qrcode"); c.innerHTML = "";
+            try { new QRCode(c, { text: pass, width: 160, height: 160, correctLevel: QRCode.CorrectLevel.L }); } catch(e) {}
+        }
+        function copyPassText() { 
+            const txt = document.getElementById("pass-result").innerText;
+            if(txt === "Select Options" || txt === "...") return;
+            navigator.clipboard.writeText(txt).then(() => {
+                toast(i18n[curLang].msg_copy_text_ok);
+                const d = document.getElementById("pass-result"); d.style.backgroundColor = "rgba(16,185,129,0.2)"; setTimeout(() => d.style.backgroundColor = "", 200);
+            }); 
+        }
+
+        function generateBarcode() {
+            if(typeof JsBarcode === 'undefined') return;
+            let txt = document.getElementById("bc-text").value;
+            let format = document.getElementById("bc-format").value;
+            let height = parseInt(document.getElementById("bc-height").value) || 100;
+            let width = parseInt(document.getElementById("bc-width").value) || 2;
+            let displayValue = document.getElementById("bc-display").value === "true";
+
+            if(!txt) {
+                if (format === "EAN13") txt = "1234567890128";
+                else if (format === "UPC") txt = "123456789012";
+                else if (format === "ITF14") txt = "12345678901231";
+                else txt = "CNS-2026-PRO";
+            }
+
+            try {
+                JsBarcode("#barcode-canvas", txt, { format: format, lineColor: "#000", width: width, height: height, displayValue: displayValue, font: "Sarabun", background: "#ffffff", margin: 15 });
+                document.getElementById("barcode-error").style.display = "none"; document.getElementById("barcode-canvas").style.display = "block";
+            } catch (e) { document.getElementById("barcode-canvas").style.display = "none"; document.getElementById("barcode-error").style.display = "block"; }
+        }
+
+        function generateWifi() {
+            const c = document.getElementById("wifi-qrcode"); c.innerHTML = "";
+            let ssid = document.getElementById("wifi-ssid").value || "MyWiFi";
+            let pass = document.getElementById("wifi-pass").value;
+            let type = document.getElementById("wifi-type").value;
+            let hidden = document.getElementById("wifi-hidden").checked;
+            const passInput = document.getElementById("wifi-pass");
+            
+            if(type === 'nopass') { passInput.disabled = true; passInput.style.backgroundColor = "var(--drop-bg)"; pass = ''; } 
+            else { passInput.disabled = false; passInput.style.backgroundColor = "var(--input-bg)"; }
+
+            let str = `WIFI:S:${escapeWifi(ssid)};T:${type};`;
+            if(type !== 'nopass') str += `P:${escapeWifi(pass)};`;
+            if(hidden) str += `H:true;`;
+            str += `;`;
+            
+            try { new QRCode(c, { text: str, width: 250, height: 250, correctLevel: QRCode.CorrectLevel.H }); handleLogo('wifi', c); } catch(e) {}
+        }
+
+        function calcCRC16(str) {
+            let crc = 0xFFFF;
+            for (let i = 0; i < str.length; i++) {
+                let x = ((crc >> 8) ^ str.charCodeAt(i)) & 0xFF;
+                x ^= x >> 4;
+                crc = ((crc << 8) ^ (x << 12) ^ (x << 5) ^ x) & 0xFFFF;
+            }
+            return ("0000" + crc.toString(16).toUpperCase()).slice(-4);
+        }
+
+        function handleLogo(prefix, container) {
+            const fileInput = document.getElementById(prefix + '-logo');
+            setTimeout(() => {
+                const imgQR = container.querySelector("img"); if(!imgQR) return;
+                imgQR.style.maxWidth = "100%"; imgQR.style.height = "auto";
+                if (fileInput.files && fileInput.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const logoImg = new Image();
+                        logoImg.onload = function() { if(container.innerHTML !== "") addLogoToQR(container, logoImg); };
+                        logoImg.src = e.target.result;
+                    }; reader.readAsDataURL(fileInput.files[0]);
+                }
+            }, 50); 
+        }
+
+        function addLogoToQR(container, logoImg) {
+            const qrImg = container.querySelector("img"); if(!qrImg) return;
+            const canvas = document.createElement("canvas"); const ctx = canvas.getContext("2d");
+            const size = qrImg.naturalWidth || qrImg.width || 250; 
+            canvas.width = size; canvas.height = size;
+            ctx.drawImage(qrImg, 0, 0, size, size);
+            const logoSize = size * 0.22; const logoPos = (size - logoSize) / 2;
+            ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.rect(logoPos - 2, logoPos - 2, logoSize + 4, logoSize + 4); ctx.fill();
+            ctx.drawImage(logoImg, logoPos, logoPos, logoSize, logoSize);
+            container.innerHTML = ""; container.appendChild(canvas);
+            canvas.style.maxWidth = "100%"; canvas.style.height = "auto";
+        }
+
+        function getElementToExport(id) {
+            const el = document.getElementById(id); if (!el) return null;
+            if (el.tagName === 'CANVAS' || el.tagName === 'IMG') return el; 
+            return el.querySelector('canvas') || el.querySelector('img');
+        }
+
+        async function attemptCopy(id) {
+            try {
+                const targetEl = getElementToExport(id);
+                if (targetEl) { 
+                    let canvas;
+                    if (targetEl.tagName === 'CANVAS') canvas = targetEl;
+                    else { canvas = document.createElement('canvas'); canvas.width = targetEl.naturalWidth; canvas.height = targetEl.naturalHeight; canvas.getContext('2d').drawImage(targetEl, 0, 0); }
+                    canvas.toBlob(async (blob) => { try { await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]); toast(i18n[curLang].msg_copy_ok); } catch (err) { toast(i18n[curLang].msg_copy_fail, 'error'); } });
+                } else toast(i18n[curLang].msg_copy_fail, 'error');
+            } catch (e) { toast(i18n[curLang].msg_copy_fail, 'error'); }
+        }
+
+        function downloadImage(id, name) {
+            const targetEl = getElementToExport(id);
+            let url = "";
+            if (targetEl) url = (targetEl.tagName === 'CANVAS') ? targetEl.toDataURL("image/png") : targetEl.src;
+            if (url) { const a = document.createElement("a"); a.href = url; a.download = `${name}_${Date.now()}.png`; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
+        }
+
+        // --- BULK FUNCTIONS ---
+        const dropZone = document.getElementById('drop-zone');
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault(); dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) handleFileSelect(e.dataTransfer.files[0]);
+        });
+
+        function handleFileSelect(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            const fileName = file.name;
+            const ext = fileName.split('.').pop().toLowerCase();
+            document.getElementById('file-name-display').innerText = fileName;
+            
+            reader.onload = function(e) {
+                const data = e.target.result;
+                globalData = []; excelHeader = [];
+
+                if (ext === 'txt') {
+                    isExcel = false;
+                    const lines = data.split(/\r\n|\n/).filter(line => line.trim() !== '');
+                    globalData = lines.map(l => [l.trim()]);
+                    setupColumns(['Text Data']);
+                } else if (['xlsx', 'xls', 'csv'].includes(ext)) {
+                    isExcel = true;
+                    try {
+                        const workbook = XLSX.read(data, { type: 'binary' });
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        const json = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+                        if (json.length > 0) {
+                            excelHeader = json[0];
+                            globalData = json.slice(1);
+                            setupColumns(excelHeader.map((h, i) => h || `Col ${i+1}`));
+                        } else { toast(i18n[curLang].msg_no_data, 'error'); return; }
+                    } catch (err) { toast(i18n[curLang].msg_error, 'error'); return; }
+                } else { toast("Unsupported file type", 'error'); return; }
+
+                if (globalData.length > 0) {
+                    document.getElementById('row-count-display').innerText = `${globalData.length} rows`;
+                    document.getElementById('drop-zone').style.display = 'none';
+                    const inst = document.getElementById('bulk-instructions');
+                    if(inst) inst.style.display = 'none';
+                    document.getElementById('settings-area').style.display = 'block';
+                    updatePreview();
+                    toast(i18n[curLang].msg_load_ok);
+                }
+            };
+            if (ext === 'txt') reader.readAsText(file); else reader.readAsBinaryString(file);
+        }
+
+        function setupColumns(headers) {
+            const select = document.getElementById('col-select'); select.innerHTML = '';
+            headers.forEach((h, index) => { const opt = document.createElement('option'); opt.value = index; opt.innerText = h; select.appendChild(opt); });
+        }
+
+        async function updatePreview() {
+            const colIndex = parseInt(document.getElementById('col-select').value);
+            const prefix = document.getElementById('bulk-prefix').value || "";
+            const suffix = document.getElementById('bulk-suffix').value || "";
+            const ecc = document.getElementById('bulk-ecc').value;
+            const colorDark = document.getElementById('bulk-color-dark').value;
+            const colorLight = document.getElementById('bulk-color-light').value;
+
+            const tbody = document.querySelector('#preview-table tbody'); tbody.innerHTML = '';
+            const previewCount = Math.min(globalData.length, 5);
+            
+            for (let i = 0; i < previewCount; i++) {
+                const row = globalData[i];
+                const rawText = row[colIndex] || "";
+                const finalText = prefix + rawText + suffix;
+                const tr = document.createElement('tr');
+                
+                let qrImgHtml = '<span style="color:#ccc;">...</span>';
+                if(finalText) {
+                    try {
+                        const url = await HeadlessQRCode.toDataURL(String(finalText), { 
+                            width: 60, margin: 1, 
+                            errorCorrectionLevel: ecc,
+                            color: { dark: colorDark, light: colorLight }
+                        });
+                        qrImgHtml = `<img src="${url}" style="width:60px; border-radius:4px; border:1px solid #ddd;">`;
+                    } catch(e) {}
+                }
+                
+                tr.innerHTML = `<td>${i + 1}</td>
+                    <td>
+                        <div style="font-weight:600; color:var(--text-main);">${rawText}</div>
+                        ${(prefix || suffix) ? `<div style="font-size:0.8em; color:var(--accent); margin-top:2px;">➥ ${finalText}</div>` : ''}
+                    </td>
+                    <td>${qrImgHtml}</td>`;
+                tbody.appendChild(tr);
+            }
+        }
+
+        async function processAndDownload() {
+            const btn = document.getElementById('btn-process');
+            const progressContainer = document.getElementById('progress-container');
+            const fill = document.getElementById('progress-fill');
+            const txt = document.getElementById('progress-text');
+            
+            const colIndex = parseInt(document.getElementById('col-select').value);
+            const prefix = document.getElementById('bulk-prefix').value || "";
+            const suffix = document.getElementById('bulk-suffix').value || "";
+            
+            const ecc = document.getElementById('bulk-ecc').value;
+            const colorDark = document.getElementById('bulk-color-dark').value;
+            const colorLight = document.getElementById('bulk-color-light').value;
+            
+            let filename = document.getElementById('bulk-filename').value || "CNS_QR_Result";
+            filename = filename.replace(/[^a-z0-9_.-]/gi, '_');
+
+            // --- FIXED DIMENSIONS: 320px Cell, 250px QR ---
+            const cellTargetPx = 320; 
+            const qrSize = 200; // Fixed size per request (High Quality within 320px)
+            
+            // ExcelJS Units
+            const rowHeightPt = cellTargetPx * 0.75; 
+            const colWidthChars = 30; // ~320px
+
+            // Calculate Center Offset ratio
+            const offsetRatio = (cellTargetPx - qrSize) / 2 / cellTargetPx;
+
+            btn.disabled = true; progressContainer.style.display = 'block'; fill.style.width = '0%';
+
+            setTimeout(async () => {
+                try {
+                    const workbook = new ExcelJS.Workbook();
+                    const sheet = workbook.addWorksheet('QR Codes');
+                    
+                    const headers = ['No.', 'Data', 'QR Code (200px)'];
+                    sheet.addRow(headers);
+                    
+                    sheet.getRow(1).font = { bold: true, size: 12 };
+                    sheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+                    
+                    sheet.getColumn(1).width = 10;
+                    sheet.getColumn(2).width = 40;
+                    sheet.getColumn(3).width = colWidthChars; // Fixed 320px width
+
+                    const total = globalData.length;
+
+                    for (let i = 0; i < total; i++) {
+                        const originalRow = globalData[i];
+                        const rawText = String(originalRow[colIndex] || "");
+                        const finalQRText = prefix + rawText + suffix;
+                        
+                        const rowNum = i + 2; 
+                        const indexNum = i + 1;
+                        
+                        const addedRow = sheet.addRow([indexNum, finalQRText]);
+                        
+                        // Set Row Height Fixed to 320px
+                        sheet.getRow(rowNum).height = rowHeightPt;
+                        sheet.getCell(`A${rowNum}`).alignment = { vertical: 'middle', horizontal: 'center' };
+                        sheet.getCell(`B${rowNum}`).alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
+
+                        if (finalQRText) {
+                            try {
+                                const qrDataUrl = await HeadlessQRCode.toDataURL(finalQRText, { 
+                                    width: qrSize, margin: 1, 
+                                    errorCorrectionLevel: ecc,
+                                    color: { dark: colorDark, light: colorLight }
+                                });
+                                const imageId = workbook.addImage({ base64: qrDataUrl, extension: 'png' });
+                                
+                                sheet.addImage(imageId, { 
+                                    tl: { col: 2 + offsetRatio, row: rowNum - 1 + offsetRatio }, 
+                                    ext: { width: qrSize, height: qrSize }, 
+                                    editAs: 'oneCell' 
+                                });
+                            } catch (e) { console.error("QR Gen Error", e); }
+                        }
+
+                        if (i % 5 === 0 || i === total - 1) {
+                            const percent = Math.round(((i + 1) / total) * 100);
+                            fill.style.width = `${percent}%`;
+                            txt.innerText = `Processing ${i + 1}/${total}...`;
+                            await new Promise(r => setTimeout(r, 0));
+                        }
+                    }
+
+                    txt.innerText = "Finalizing Excel file...";
+                    const buffer = await workbook.xlsx.writeBuffer();
+                    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+                    saveAs(blob, `${filename}.xlsx`);
+                    
+                    toast(i18n[curLang].msg_complete);
+                    btn.disabled = false;
+                } catch (err) { toast("Error: " + err.message, "error"); btn.disabled = false; }
+            }, 100);
+        }
+
+        window.onload = function() {
+            if(typeof QRCode === 'undefined' || typeof JsBarcode === 'undefined') alert(i18n['th'].msg_offline);
+            if(localStorage.getItem('cns_gen_theme') === 'dark') { document.body.setAttribute('data-theme', 'dark'); document.getElementById('theme-icon').className = 'fas fa-sun'; }
+            if(localStorage.getItem('cns_gen_lang')) curLang = localStorage.getItem('cns_gen_lang');
+            applyLanguage();
+            // Init all to render
+            generatePromptPay(); generateQR(); generateVCard(); generateLocation(); generateEvent(); generatePass(); generateBarcode(); generateWifi();
+        }
+    </script>
+</body>
+</html>
