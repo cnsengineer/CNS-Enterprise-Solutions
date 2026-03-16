@@ -152,31 +152,43 @@
         .color-btn[data-color="#000000"] { background: #000; }
         .color-btn[data-color="#00008b"] { background: #00008b; }
 
-        /* --- New Signature Drag & Drop Styles --- */
-        #sign-workspace { text-align: center; margin-top: 20px; display: none; }
+        /* --- New Editor & Sign Styles --- */
+        #sign-workspace, #addtext-workspace { text-align: center; margin-top: 20px; display: none; }
         .pdf-nav { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 15px; }
         .pdf-nav button { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-main); padding: 8px 15px; border-radius: 6px; cursor: pointer; font-family: 'Sarabun'; font-weight: 600; transition: all 0.2s; }
         .pdf-nav button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
         .pdf-nav button:disabled { opacity: 0.5; cursor: not-allowed; }
-        #sign-pdf-wrapper { position: relative; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--border); max-width: 100%; overflow: hidden; background: white; touch-action: none; }
-        #sign-pdf-canvas-preview { max-width: 100%; display: block; }
+        #sign-pdf-wrapper, #addtext-pdf-wrapper { position: relative; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--border); max-width: 100%; overflow: hidden; background: white; touch-action: none; text-align: left; }
+        
+        #sign-pdf-canvas-preview, #addtext-pdf-canvas-preview { max-width: 100%; height: auto; display: block; transition: all 0.3s ease; }
         
         .draggable-sig { position: absolute; border: 2px dashed rgba(59, 130, 246, 0.8); background: rgba(59, 130, 246, 0.05); cursor: move; touch-action: none; user-select: none; z-index: 100; min-width: 50px; min-height: 30px; }
-        .draggable-sig img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+        .draggable-sig img { width: 100%; height: 100%; object-fit: fill; pointer-events: none; }
         .sig-resizer { position: absolute; bottom: -6px; right: -6px; width: 16px; height: 16px; background: var(--accent); border-radius: 50%; border: 2px solid white; cursor: nwse-resize; z-index: 101; }
         .sig-deleter { position: absolute; top: -10px; right: -10px; width: 22px; height: 22px; background: var(--danger); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 10px; font-weight: bold; z-index: 101; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
-        /* --- Add Text Drag & Drop Styles --- */
-        #addtext-workspace { text-align: center; margin-top: 20px; display: none; }
-        #addtext-pdf-wrapper { position: relative; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--border); max-width: 100%; overflow: hidden; background: white; touch-action: none; text-align: left; }
-        #addtext-pdf-canvas-preview { max-width: 100%; display: block; }
+        /* --- Advanced Editor Styles --- */
+        .editor-toolbar { display:flex; gap:10px; padding:12px; background:var(--drop-bg); border:1px solid var(--border); border-radius:8px; margin-bottom:15px; flex-wrap:wrap; align-items:center; }
+        .tool-group { display:flex; gap:5px; border-right:1px solid var(--border); padding-right:10px; align-items:center; }
+        .tool-btn { background: var(--card-bg); border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.2s; display:flex; align-items:center; gap:5px; color: var(--text-sec); }
+        .tool-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+        .tool-btn:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
         
-        .draggable-text { position: absolute; border: 2px dashed rgba(16, 185, 129, 0.8); background: rgba(16, 185, 129, 0.05); cursor: move; touch-action: none; user-select: none; z-index: 100; min-width: 40px; min-height: 24px; display: flex; align-items: center; justify-content: flex-start; padding: 2px; box-sizing: border-box; }
-        .draggable-text span { display: block; white-space: pre-wrap; word-wrap: break-word; line-height: 1.1; pointer-events: none; width: 100%; }
-        .text-resizer { position: absolute; bottom: -6px; right: -6px; width: 16px; height: 16px; background: var(--success); border-radius: 50%; border: 2px solid white; cursor: nwse-resize; z-index: 101; }
-        .text-rotator { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 16px; height: 16px; background: var(--warning); border-radius: 50%; border: 2px solid white; cursor: grab; z-index: 101; }
-        .text-rotator::after { content: ''; position: absolute; top: 14px; left: 6px; width: 2px; height: 10px; background: var(--warning); }
-        .text-deleter { position: absolute; top: -10px; right: -10px; width: 22px; height: 22px; background: var(--danger); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 10px; font-weight: bold; z-index: 101; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .draggable-obj { position: absolute; cursor: move; user-select: none; box-sizing: border-box; border: 1px dashed transparent; transition: opacity 0.2s; }
+        .draggable-obj.active-obj { border: 1px dashed var(--accent); box-shadow: 0 0 0 2px rgba(0,70,190,0.2); } 
+        .obj-content { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; pointer-events: none; position: relative; }
+        .draggable-obj[data-type="text"] span { pointer-events: auto; white-space: pre-wrap; word-wrap: break-word; width: 100%; line-height: 1.1; outline: none; }
+        .draggable-obj[data-type="draw"] img, .draggable-obj[data-type="image"] img { width: 100%; height: 100%; object-fit: fill; pointer-events: none; }
+        
+        .obj-resizer { position: absolute; bottom: -6px; right: -6px; width: 16px; height: 16px; background: var(--success); border-radius: 50%; border: 2px solid white; cursor: nwse-resize; z-index: 101; display: none; }
+        .obj-rotator { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 16px; height: 16px; background: var(--warning); border-radius: 50%; border: 2px solid white; cursor: grab; z-index: 101; display: none; }
+        .obj-rotator::after { content: ''; position: absolute; top: 14px; left: 6px; width: 2px; height: 10px; background: var(--warning); }
+        .obj-deleter { position: absolute; top: -10px; right: -10px; width: 22px; height: 22px; background: var(--danger); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 10px; font-weight: bold; z-index: 101; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: none; }
+        
+        .draggable-obj.active-obj .obj-resizer, .draggable-obj.active-obj .obj-rotator, .draggable-obj.active-obj .obj-deleter { display: flex; }
+        
+        .snap-guide-x { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--danger); z-index: 1000; pointer-events: none; opacity: 0.7; display: none; }
+        .snap-guide-y { position: absolute; left: 0; right: 0; height: 1px; background: var(--danger); z-index: 1000; pointer-events: none; opacity: 0.7; display: none; }
 
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         ::-webkit-scrollbar { width: 8px; height: 8px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--drop-border); border-radius: 4px; } ::-webkit-scrollbar-thumb:hover { background: var(--text-sec); }
@@ -265,7 +277,7 @@
         </div>
 
         <div id="addtext" class="tool-panel">
-            <div class="panel-header"><div><h2><i class="fas fa-font"></i> <span data-i18n="title_addtext">Add Text</span></h2><p class="tool-desc" data-i18n="desc_addtext">Add text boxes to PDF.</p></div><button class="btn-reset" onclick="resetTool('addtext')"><i class="fas fa-redo"></i> <span data-i18n="btn_reset">Reset</span></button></div>
+            <div class="panel-header"><div><h2><i class="fas fa-font"></i> <span data-i18n="title_addtext">Add Text / Editor</span></h2><p class="tool-desc" data-i18n="desc_addtext">Add text boxes, shapes and drawing to PDF.</p></div><button class="btn-reset" onclick="resetTool('addtext')"><i class="fas fa-redo"></i> <span data-i18n="btn_reset">Reset</span></button></div>
             <div class="card">
                 <div class="drop-zone" id="dz-addtext">
                     <div id="label-addtext">
@@ -276,38 +288,85 @@
                 </div>
 
                 <div id="addtext-workspace">
+                    
+                    <!-- Advanced Editor Toolbar -->
+                    <div class="editor-toolbar">
+                        <div class="tool-group">
+                            <button class="tool-btn" data-tool="text" onclick="spawnEditorObject('text')" title="ข้อความ"><i class="fas fa-font"></i></button>
+                            <button class="tool-btn" data-tool="rect" onclick="spawnEditorObject('rect')" title="สี่เหลี่ยม"><i class="far fa-square"></i></button>
+                            <button class="tool-btn" data-tool="circle" onclick="spawnEditorObject('circle')" title="วงกลม"><i class="far fa-circle"></i></button>
+                            <button class="tool-btn" data-tool="line" onclick="spawnEditorObject('line')" title="เส้นตรง"><i class="fas fa-minus"></i></button>
+                            <button class="tool-btn" data-tool="arrow" onclick="spawnEditorObject('arrow')" title="ลูกศร"><i class="fas fa-arrow-right"></i></button>
+                            <button class="tool-btn" data-tool="draw" onclick="activateDrawMode('draw')" title="วาดอิสระ/ลายเซ็น"><i class="fas fa-pen"></i></button>
+                            <button class="tool-btn" data-tool="highlight" onclick="activateDrawMode('highlight')" title="ปากกาไฮไลท์"><i class="fas fa-highlighter"></i></button>
+                            <button class="tool-btn" data-tool="image" onclick="document.getElementById('ed-img-upload').click()" title="แทรกรูปภาพ"><i class="fas fa-image"></i></button>
+                            <input type="file" id="ed-img-upload" accept="image/png, image/jpeg, image/webp" style="display:none" onchange="addEditorImage(this)">
+                        </div>
+                        
+                        <div class="tool-group" style="gap:10px;">
+                            <label style="font-size:0.8rem; display:flex; align-items:center; gap:5px; font-weight:bold;">
+                                <select id="font-addtext-val" style="padding:4px; border-radius:4px; border:1px solid var(--border); font-family: inherit; cursor:pointer;" onchange="updateActiveObjectProperty('font', this.value)" title="รูปแบบฟอนต์">
+                                    <option value="Sarabun" style="font-family: 'Sarabun';">Sarabun</option>
+                                    <option value="Niramit" style="font-family: 'Niramit';">Niramit</option>
+                                    <option value="Krub" style="font-family: 'Krub';">Krub</option>
+                                    <option value="Mali" style="font-family: 'Mali';">Mali</option>
+                                    <option value="Prompt" style="font-family: 'Prompt';">Prompt</option>
+                                </select>
+                            </label>
+                            <label style="font-size:0.8rem; display:flex; align-items:center; gap:5px; font-weight:bold;" title="สีพื้นหลัง / สีข้อความ / สีไฮไลท์">
+                                Fill 
+                                <input type="color" id="ed-fill" value="#0046be" style="padding:0; width:25px; height:25px; border:none; cursor:pointer;" oninput="updateFillProperty()">
+                                <input type="checkbox" id="ed-fill-trans" checked title="โปร่งใส" onchange="updateFillProperty()"> 
+                            </label>
+                            <label style="font-size:0.8rem; display:flex; align-items:center; gap:5px; font-weight:bold;" title="สีเส้นขอบ / สีปากกาวาด">
+                                Stroke 
+                                <input type="color" id="ed-stroke" value="#ef4444" style="padding:0; width:25px; height:25px; border:none; cursor:pointer;" oninput="updateActiveObjectProperty('stroke', this.value)">
+                            </label>
+                            <label style="font-size:0.8rem; display:flex; align-items:center; gap:5px; font-weight:bold;" title="ความหนาของเส้น">
+                                W <input type="number" id="ed-stroke-w" value="3" min="0" max="30" style="width:45px; padding:2px 5px;" oninput="updateActiveObjectProperty('strokeW', this.value)">
+                            </label>
+                            <label style="font-size:0.8rem; display:flex; align-items:center; gap:5px; font-weight:bold; border-left:1px solid var(--border); padding-left:10px;" title="ความโปร่งใส (Opacity)">
+                                <i class="fas fa-eye"></i> <input type="range" id="ed-opacity" min="10" max="100" value="100" style="width:60px;" oninput="updateActiveObjectProperty('opacity', this.value / 100)">
+                            </label>
+                        </div>
+                        
+                        <div class="tool-group">
+                            <button class="btn-sm" onclick="layerActive(1)" title="นำไปข้างหน้าสุด"><i class="fas fa-layer-group"></i> <i class="fas fa-arrow-up"></i></button>
+                            <button class="btn-sm" onclick="layerActive(-1)" title="ส่งไปข้างหลังสุด"><i class="fas fa-layer-group"></i> <i class="fas fa-arrow-down"></i></button>
+                            <button class="btn-sm" onclick="duplicateActiveObject()" title="ทำซ้ำวัตถุ (Ctrl+D)"><i class="fas fa-copy"></i></button>
+                        </div>
+                        
+                        <div class="tool-group">
+                            <button class="btn-sm" onclick="editorUndo()" title="ย้อนกลับ (Undo)"><i class="fas fa-undo"></i></button>
+                            <button class="btn-sm" onclick="editorRedo()" title="ทำซ้ำ (Redo)"><i class="fas fa-redo"></i></button>
+                        </div>
+
+                        <div class="tool-group" style="border-right:none; margin-left:auto;">
+                            <button class="btn-sm" onclick="clearPageObjects()" title="ล้างวัตถุทั้งหมดในหน้านี้" style="color:var(--danger); border-color:var(--danger);"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    </div>
+
                     <div class="pdf-nav">
                         <button onclick="changeAddTextPage(-1)" id="addtext-btn-prev" disabled><i class="fas fa-chevron-left"></i> <span data-i18n="btn_prev">ก่อนหน้า</span></button>
                         <span style="font-weight: 600;"><span data-i18n="lbl_page">Page</span> <span id="addtext-current-page">1</span> / <span id="addtext-total-pages">1</span></span>
                         <button onclick="changeAddTextPage(1)" id="addtext-btn-next"><span data-i18n="btn_next">ถัดไป</span> <i class="fas fa-chevron-right"></i></button>
+                        
+                        <!-- Zoom Controls -->
+                        <div style="border-left:1px solid var(--border); padding-left:15px; margin-left:5px; display:flex; gap:5px; align-items:center;">
+                            <button class="btn-sm" onclick="changeEditorZoom(-0.2)" title="ย่อ"><i class="fas fa-search-minus"></i></button>
+                            <span id="addtext-zoom-val" style="font-size:0.85rem; font-weight:bold; min-width:40px; text-align:center;">150%</span>
+                            <button class="btn-sm" onclick="changeEditorZoom(0.2)" title="ขยาย"><i class="fas fa-search-plus"></i></button>
+                        </div>
                     </div>
                     
-                    <div id="addtext-pdf-wrapper">
-                        <canvas id="addtext-pdf-canvas-preview"></canvas>
-                    </div>
-                </div>
-
-                <div class="grid-2" style="margin-top:1.5rem; background: var(--drop-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border);">
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label data-i18n="lbl_input_text">ข้อความ</label>
-                        <textarea id="text-addtext-val" rows="2" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: 'Sarabun';" data-i18n-placeholder="ph_input_text" placeholder="พิมพ์ข้อความที่ต้องการ..."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="lbl_font">แบบอักษร</label>
-                        <select id="font-addtext-val" style="font-family: inherit;">
-                            <option value="Sarabun" style="font-family: 'Sarabun';">Sarabun (สารบรรณ)</option>
-                            <option value="Niramit" style="font-family: 'Niramit';">Niramit (นิรมิต)</option>
-                            <option value="Krub" style="font-family: 'Krub';">Krub (กรับ)</option>
-                            <option value="Mali" style="font-family: 'Mali';">Mali (มะลิ - น่ารัก)</option>
-                            <option value="Prompt" style="font-family: 'Prompt';">Prompt (พร้อม - โมเดิร์น)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="lbl_color">สีข้อความ</label>
-                        <input type="color" id="color-addtext-val" value="#000000" style="height: 45px; padding: 2px; cursor: pointer;">
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1; display: flex; justify-content: flex-end;">
-                        <button type="button" class="btn-sm" style="background:var(--success); color:white; border:none; padding: 10px 20px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;" onclick="addTextToPreview()"><i class="fas fa-plus"></i> <span data-i18n="btn_add_to_page">เพิ่มลงหน้านี้</span></button>
+                    <!-- Editor Area wrapper (scrollable if zoomed in) -->
+                    <div style="width:100%; max-height: 600px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--drop-bg); padding: 10px; display:flex; justify-content:center;">
+                        <div id="addtext-pdf-wrapper" onclick="deselectAllObjects(event)" style="box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--drop-border); background: white; margin: 0 auto; transform-origin: top center;">
+                            <canvas id="addtext-pdf-canvas-preview"></canvas>
+                            <canvas id="draw-overlay" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:999; display:none; cursor:crosshair;"></canvas>
+                            <div id="snap-guide-x" class="snap-guide-x"></div>
+                            <div id="snap-guide-y" class="snap-guide-y"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -606,19 +665,19 @@
                 title_unlock: "ปลดล็อก PDF", desc_unlock: "ลบรหัสผ่านออกจากไฟล์", lbl_pass_curr: "รหัสผ่านปัจจุบัน", btn_unlock: "ปลดล็อก",
                 title_delete: "ลบหน้า", desc_delete: "ลบหน้าที่ไม่ต้องการ", lbl_del_pages: "ระบุหน้าที่จะลบ", btn_delete: "ลบหน้า",
                 title_sign: "เซ็นเอกสาร", desc_sign: "วาดลายเซ็นและลากวางอิสระ", lbl_draw_sig: "วาดลายเซ็น", btn_clear_sig: "ล้าง", btn_sign: "บันทึก PDF ที่มีลายเซ็น", btn_add_to_page: "เพิ่มลงหน้านี้", lbl_page: "หน้า", btn_prev: "ก่อนหน้า", btn_next: "ถัดไป",
-                title_addtext: "เพิ่มข้อความ (Add Text)", desc_addtext: "พิมพ์ข้อความและวางลงบนเอกสารได้อย่างอิสระ", lbl_input_text: "พิมพ์ข้อความ", lbl_font: "รูปแบบฟอนต์", btn_save_pdf: "บันทึก PDF",
+                title_addtext: "เพิ่มข้อความ / แก้ไข", desc_addtext: "เพิ่มกล่องข้อความ รูปร่าง และวาดเขียนลงบนเอกสาร", lbl_input_text: "พิมพ์ข้อความ", lbl_font: "รูปแบบฟอนต์", btn_save_pdf: "บันทึก PDF",
                 title_metadata: "แก้ไข Metadata", desc_metadata: "แก้ไขข้อมูล Title, Author, Keywords", lbl_meta_title: "ชื่อเอกสาร (Title)", lbl_meta_author: "ผู้แต่ง (Author)", lbl_meta_subject: "หัวข้อ (Subject)", lbl_meta_keywords: "คำค้นหา (Keywords)", btn_metadata: "บันทึกข้อมูล",
                 
                 msg_done: "เสร็จเรียบร้อย!", msg_err_pdf: "เลือกไฟล์ PDF ก่อน", msg_err_pass: "รหัสผ่านไม่ถูกต้อง", msg_add_files: "เพิ่มไฟล์แล้ว", msg_processing: "กำลังประมวลผล...",
                 msg_err_merge: "ต้องใช้ไฟล์ PDF อย่างน้อย 2 ไฟล์", msg_err_pass_req: "กรุณาใส่รหัสผ่าน", 
-                msg_no_text_added: "คุณยังไม่ได้เพิ่มข้อความลงบนหน้าเอกสาร (คลิก เพิ่มลงหน้านี้)", msg_text_added: "เพิ่มข้อความลงในหน้าปัจจุบันแล้ว สามารถลากหรือปรับขนาดได้", 
+                msg_no_text_added: "คุณยังไม่ได้เพิ่มวัตถุลงบนหน้าเอกสาร", msg_text_added: "เพิ่มวัตถุลงในหน้าปัจจุบันแล้ว สามารถลาก ปรับขนาด หรือดับเบิลคลิกเพื่อแก้ข้อความได้", 
                 msg_err_empty_text: "กรุณาพิมพ์ข้อความที่ต้องการเพิ่ม", msg_err_no_sig: "กรุณาวาดลายเซ็นก่อน", 
                 msg_sig_added: "เพิ่มลายเซ็นลงในหน้าปัจจุบันแล้ว สามารถลากหรือปรับขนาดได้", msg_err_img: "กรุณาเลือกรูปภาพก่อน",
                 msg_proc_page: "กำลังประมวลผลหน้าที่ {1} จาก {2}...",
                 
                 loading_init: "กำลังเตรียมพร้อม...", loading_gen: "กำลังสร้าง PDF...", loading_merge: "กำลังรวมไฟล์...", loading_split: "กำลังแยกไฟล์...", 
                 loading_del: "กำลังลบหน้า...", loading_comp: "กำลังบีบอัด...", loading_font: "กำลังโหลดฟอนต์...", loading_apply_sig: "กำลังฝังลายเซ็น...", 
-                loading_apply_txt: "กำลังฝังข้อความ...", loading_apply_wm: "กำลังฝังลายน้ำ...", loading_rotate: "กำลังหมุนไฟล์...", loading_meta: "กำลังอัปเดต Metadata...",
+                loading_apply_txt: "กำลังฝังวัตถุลง PDF...", loading_apply_wm: "กำลังฝังลายน้ำ...", loading_rotate: "กำลังหมุนไฟล์...", loading_meta: "กำลังอัปเดต Metadata...",
                 
                 opt_std: "มาตรฐาน", opt_high: "สูง", opt_ultra: "สูงสุด", opt_smart: "Auto (ไฟล์เดียวโหลดเลย)", opt_zip: "รวมเป็น ZIP เสมอ",
                 opt_auto: "เท่าขนาดรูปจริง", opt_no_margin: "ไม่มีขอบ", opt_small: "ขอบเล็ก", opt_std_margin: "ขอบมาตรฐาน",
@@ -653,19 +712,19 @@
                 title_unlock: "Unlock PDF", desc_unlock: "Remove password", lbl_pass_curr: "Current Password", btn_unlock: "Unlock",
                 title_delete: "Delete Pages", desc_delete: "Remove pages", lbl_del_pages: "Pages to delete", btn_delete: "Delete",
                 title_sign: "Sign PDF", desc_sign: "Draw and place signature freely", lbl_draw_sig: "Draw Signature", btn_clear_sig: "Clear", btn_sign: "Save Signed PDF", btn_add_to_page: "Add to page", lbl_page: "Page", btn_prev: "Prev", btn_next: "Next",
-                title_addtext: "Add Text", desc_addtext: "Add and place text boxes on PDF freely", lbl_input_text: "Input Text", lbl_font: "Font Family", btn_save_pdf: "Save PDF",
+                title_addtext: "PDF Editor", desc_addtext: "Add texts, shapes and freehand draw", lbl_input_text: "Input Text", lbl_font: "Font Family", btn_save_pdf: "Save PDF",
                 title_metadata: "Edit Metadata", desc_metadata: "Edit Title, Author, Keywords", lbl_meta_title: "Title", lbl_meta_author: "Author", lbl_meta_subject: "Subject", lbl_meta_keywords: "Keywords", btn_metadata: "Save Metadata",
                 
                 msg_done: "Done!", msg_err_pdf: "Select PDF first", msg_err_pass: "Incorrect password", msg_add_files: "Files added", msg_processing: "Processing...",
                 msg_err_merge: "Need 2+ PDF files", msg_err_pass_req: "Password is required", 
-                msg_no_text_added: "No text added to document. Click 'Add to page' first.", msg_text_added: "Text added to current page. You can drag and resize it.", 
+                msg_no_text_added: "No objects added to document.", msg_text_added: "Object added. You can drag, resize, or double-click to edit texts.", 
                 msg_err_empty_text: "Please input text to add.", msg_err_no_sig: "Please draw a signature first.", 
                 msg_sig_added: "Signature added to current page. You can drag and resize it.", msg_err_img: "Please select images first",
                 msg_proc_page: "Processing Page {1} of {2}...",
                 
                 loading_init: "Initializing...", loading_gen: "Generating PDF...", loading_merge: "Merging...", loading_split: "Splitting...", 
                 loading_del: "Removing Pages...", loading_comp: "Compressing...", loading_font: "Downloading Fonts...", loading_apply_sig: "Applying Signatures...", 
-                loading_apply_txt: "Applying Text...", loading_apply_wm: "Applying Watermark...", loading_rotate: "Rotating...", loading_meta: "Updating Metadata...",
+                loading_apply_txt: "Flattening objects to PDF...", loading_apply_wm: "Applying Watermark...", loading_rotate: "Rotating...", loading_meta: "Updating Metadata...",
                 
                 opt_std: "Standard", opt_high: "High", opt_ultra: "Ultra", opt_smart: "Auto", opt_zip: "Always ZIP",
                 opt_auto: "Fit Image", opt_no_margin: "None", opt_small: "Small", opt_std_margin: "Standard",
@@ -782,7 +841,7 @@
                     const tip = dz.querySelector('.drop-tip'); if(tip) tip.style.display='none';
                     if(['pdf2img','split','rotate','delete','watermark'].includes(k)) generatePreviews(fs[0], k);
                     if(k === 'sign') initSignPreview(fs[0]);
-                    if(k === 'addtext') initAddTextPreview(fs[0]); // Initialize visual text workspace
+                    if(k === 'addtext') initAddTextPreview(fs[0]); 
                 }
             };
             dz.onclick=()=>inp.click(); dz.ondragover=e=>{e.preventDefault();dz.classList.add('dragover')}; dz.ondragleave=()=>dz.classList.remove('dragover'); dz.ondrop=e=>{e.preventDefault();dz.classList.remove('dragover');h(e.dataTransfer.files)}; inp.onchange=e=>h(e.target.files);
@@ -802,36 +861,23 @@
         function clearSig(){sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height)} function setSigColor(btn){sigColor=btn.getAttribute('data-color');sigCtx.strokeStyle=sigColor;document.querySelectorAll('.color-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}
 
         // --- Signature PDF Visual Workspace Logic ---
-        const signWorkspace = {
-            pdf: null,
-            currentPage: 1,
-            totalPages: 1,
-            data: {} // Format: { pageNum: [ { id: 'sig1', img: 'data:...', x: 0.5, y: 0.5, w: 0.2, h: 0.1 } ] }
-        };
+        const signWorkspace = { pdf: null, currentPage: 1, totalPages: 1, data: {} };
 
         function resetSignWorkspace() {
-            signWorkspace.pdf = null;
-            signWorkspace.currentPage = 1;
-            signWorkspace.totalPages = 1;
-            signWorkspace.data = {};
+            signWorkspace.pdf = null; signWorkspace.currentPage = 1; signWorkspace.totalPages = 1; signWorkspace.data = {};
             document.getElementById('sign-workspace').style.display = 'none';
             document.getElementById('sign-pdf-wrapper').querySelectorAll('.draggable-sig').forEach(el => el.remove());
         }
 
         async function initSignPreview(file) {
             try {
-                showLoading(t('loading_init'));
-                resetSignWorkspace();
+                showLoading(t('loading_init')); resetSignWorkspace();
                 signWorkspace.pdf = await pdfjsLib.getDocument(await file.arrayBuffer()).promise;
                 signWorkspace.totalPages = signWorkspace.pdf.numPages;
                 document.getElementById('sign-workspace').style.display = 'block';
                 document.getElementById('sign-total-pages').innerText = signWorkspace.totalPages;
-                await renderSignPage(1);
-                hideLoading();
-            } catch(e) {
-                hideLoading();
-                toast(e.message, 'error');
-            }
+                await renderSignPage(1); hideLoading();
+            } catch(e) { hideLoading(); toast(e.message, 'error'); }
         }
 
         async function renderSignPage(pageNum) {
@@ -843,14 +889,9 @@
             const page = await signWorkspace.pdf.getPage(pageNum);
             const viewport = page.getViewport({ scale: 1.5 });
             const canvas = document.getElementById('sign-pdf-canvas-preview');
-            const context = canvas.getContext('2d');
-            
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
+            canvas.height = viewport.height; canvas.width = viewport.width;
+            await page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise;
 
-            await page.render({ canvasContext: context, viewport: viewport }).promise;
-
-            // Restore signatures for this page
             const wrapper = document.getElementById('sign-pdf-wrapper');
             wrapper.querySelectorAll('.draggable-sig').forEach(el => el.remove());
             
@@ -862,239 +903,141 @@
         }
 
         async function changeSignPage(delta) {
-            saveCurrentPageSignatures(); // Save current DOM state before switching
+            saveCurrentPageSignatures();
             const newPage = signWorkspace.currentPage + delta;
-            if (newPage >= 1 && newPage <= signWorkspace.totalPages) {
-                await renderSignPage(newPage);
-            }
+            if (newPage >= 1 && newPage <= signWorkspace.totalPages) await renderSignPage(newPage);
         }
 
         function saveCurrentPageSignatures() {
-            const wrapper = document.getElementById('sign-pdf-wrapper');
-            const wrapperRect = wrapper.getBoundingClientRect();
-            const sigs = wrapper.querySelectorAll('.draggable-sig');
-            
+            const wrapper = document.getElementById('sign-pdf-wrapper'), wrapperRect = wrapper.getBoundingClientRect(), sigs = wrapper.querySelectorAll('.draggable-sig');
             const pageData = [];
             sigs.forEach(sig => {
                 const img = sig.querySelector('img').src;
-                // Save relative positions (percentages) so it survives window resizes
-                const x = sig.offsetLeft / wrapperRect.width;
-                const y = sig.offsetTop / wrapperRect.height;
-                const w = sig.offsetWidth / wrapperRect.width;
-                const h = sig.offsetHeight / wrapperRect.height;
+                const x = sig.offsetLeft / wrapperRect.width, y = sig.offsetTop / wrapperRect.height, w = sig.offsetWidth / wrapperRect.width, h = sig.offsetHeight / wrapperRect.height;
                 pageData.push({ id: sig.id, img, x, y, w, h });
             });
-            
             signWorkspace.data[signWorkspace.currentPage] = pageData;
         }
 
         function addSignatureToPreview() {
-            const blank = document.createElement('canvas'); 
-            blank.width = sigCanvas.width; 
-            blank.height = sigCanvas.height;
-            if (sigCanvas.toDataURL() === blank.toDataURL()) {
-                return toast(t('msg_err_no_sig'), 'error');
-            }
-
-            // Create signature in the middle of the preview
-            // Crop the empty space around the signature for better UX (Optional, skipping for speed, using full drawn box)
-            createSignatureElement(sigCanvas.toDataURL(), 0.3, 0.4, 0.4, 0.2, 'sig_' + Date.now());
+            const blank = document.createElement('canvas'); blank.width = sigCanvas.width; blank.height = sigCanvas.height;
+            if (sigCanvas.toDataURL() === blank.toDataURL()) return toast(t('msg_err_no_sig'), 'error');
+            
+            const wrapperRect = document.getElementById('sign-pdf-wrapper').getBoundingClientRect();
+            const wrapperRatio = wrapperRect.width / wrapperRect.height;
+            const imgRatio = sigCanvas.height / sigCanvas.width;
+            
+            createSignatureElement(sigCanvas.toDataURL(), 0.3, 0.4, 0.4, 0.4 * wrapperRatio * imgRatio, 'sig_' + Date.now());
             toast(t('msg_sig_added'));
         }
 
         function createSignatureElement(imgSrc, relX, relY, relW, relH, id) {
-            const wrapper = document.getElementById('sign-pdf-wrapper');
-            const wrapperRect = wrapper.getBoundingClientRect();
+            const wrapper = document.getElementById('sign-pdf-wrapper'), wrapperRect = wrapper.getBoundingClientRect();
+            const sigDiv = document.createElement('div'); sigDiv.className = 'draggable-sig'; sigDiv.id = id;
+            sigDiv.style.left = (relX * wrapperRect.width) + 'px'; sigDiv.style.top = (relY * wrapperRect.height) + 'px';
+            sigDiv.style.width = (relW * wrapperRect.width) + 'px'; sigDiv.style.height = (relH * wrapperRect.height) + 'px';
             
-            const sigDiv = document.createElement('div');
-            sigDiv.className = 'draggable-sig';
-            sigDiv.id = id;
-            
-            // Convert relative back to px for CSS
-            sigDiv.style.left = (relX * wrapperRect.width) + 'px';
-            sigDiv.style.top = (relY * wrapperRect.height) + 'px';
-            sigDiv.style.width = (relW * wrapperRect.width) + 'px';
-            sigDiv.style.height = (relH * wrapperRect.height) + 'px';
-
-            const img = document.createElement('img');
-            img.src = imgSrc;
-            
-            const resizer = document.createElement('div');
-            resizer.className = 'sig-resizer';
-            
-            const deleter = document.createElement('div');
-            deleter.className = 'sig-deleter';
-            deleter.innerHTML = '<i class="fas fa-times"></i>';
+            const img = document.createElement('img'); img.src = imgSrc;
+            const resizer = document.createElement('div'); resizer.className = 'sig-resizer';
+            const deleter = document.createElement('div'); deleter.className = 'sig-deleter'; deleter.innerHTML = '<i class="fas fa-times"></i>';
             deleter.onclick = function() { sigDiv.remove(); saveCurrentPageSignatures(); };
 
-            sigDiv.appendChild(img);
-            sigDiv.appendChild(resizer);
-            sigDiv.appendChild(deleter);
-            wrapper.appendChild(sigDiv);
-
+            sigDiv.appendChild(img); sigDiv.appendChild(resizer); sigDiv.appendChild(deleter); wrapper.appendChild(sigDiv);
             makeElementDraggableAndResizable(sigDiv);
         }
 
         function makeElementDraggableAndResizable(elmnt) {
-            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-            let startW = 0, startH = 0, startX = 0, startY = 0;
-            let isResizing = false;
-
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0, startW = 0, startH = 0, startX = 0, startY = 0, isResizing = false;
             elmnt.onpointerdown = dragMouseDown;
 
             function dragMouseDown(e) {
-                e.preventDefault();
-                if (e.target.className.includes('sig-deleter')) return;
-
+                e.preventDefault(); if (e.target.className.includes('sig-deleter')) return;
                 if (e.target.className.includes('sig-resizer')) {
-                    isResizing = true;
-                    startW = elmnt.offsetWidth;
-                    startH = elmnt.offsetHeight;
-                    startX = e.clientX || e.touches[0].clientX;
-                    startY = e.clientY || e.touches[0].clientY;
+                    isResizing = true; startW = elmnt.offsetWidth; startH = elmnt.offsetHeight;
+                    startX = e.clientX || e.touches[0].clientX; startY = e.clientY || e.touches[0].clientY;
                 } else {
-                    isResizing = false;
-                    pos3 = e.clientX || e.touches[0].clientX;
-                    pos4 = e.clientY || e.touches[0].clientY;
+                    isResizing = false; pos3 = e.clientX || e.touches[0].clientX; pos4 = e.clientY || e.touches[0].clientY;
                 }
-                
-                document.onpointerup = closeDragElement;
-                document.onpointermove = elementDrag;
-                
-                // Add touch fallbacks just in case
-                document.ontouchend = closeDragElement;
-                document.ontouchmove = elementDrag;
+                document.onpointerup = closeDragElement; document.onpointermove = elementDrag;
+                document.ontouchend = closeDragElement; document.ontouchmove = elementDrag;
             }
 
             function elementDrag(e) {
                 e.preventDefault();
-                const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
-                const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
-
+                const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0), clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
                 const wrapper = document.getElementById('sign-pdf-wrapper');
-
                 if (isResizing) {
-                    const diffX = clientX - startX;
-                    const diffY = clientY - startY;
-                    let newW = startW + diffX;
-                    let newH = startH + diffY;
-                    
-                    // Maintain aspect ratio roughly or allow free scale. Free scale is simpler.
-                    if (newW > 30) elmnt.style.width = newW + "px";
-                    if (newH > 20) elmnt.style.height = newH + "px";
+                    let newW = startW + (clientX - startX), newH = startH + (clientY - startY);
+                    if (newW > 30) elmnt.style.width = newW + "px"; if (newH > 20) elmnt.style.height = newH + "px";
                 } else {
-                    pos1 = pos3 - clientX;
-                    pos2 = pos4 - clientY;
-                    pos3 = clientX;
-                    pos4 = clientY;
-
-                    let newTop = elmnt.offsetTop - pos2;
-                    let newLeft = elmnt.offsetLeft - pos1;
-
-                    // Bound to wrapper
-                    if (newTop < 0) newTop = 0;
-                    if (newLeft < 0) newLeft = 0;
+                    pos1 = pos3 - clientX; pos2 = pos4 - clientY; pos3 = clientX; pos4 = clientY;
+                    let newTop = elmnt.offsetTop - pos2, newLeft = elmnt.offsetLeft - pos1;
+                    if (newTop < 0) newTop = 0; if (newLeft < 0) newLeft = 0;
                     if (newTop + elmnt.offsetHeight > wrapper.offsetHeight) newTop = wrapper.offsetHeight - elmnt.offsetHeight;
                     if (newLeft + elmnt.offsetWidth > wrapper.offsetWidth) newLeft = wrapper.offsetWidth - elmnt.offsetWidth;
-
-                    elmnt.style.top = newTop + "px";
-                    elmnt.style.left = newLeft + "px";
+                    elmnt.style.top = newTop + "px"; elmnt.style.left = newLeft + "px";
                 }
             }
 
             function closeDragElement() {
-                document.onpointerup = null;
-                document.onpointermove = null;
-                document.ontouchend = null;
-                document.ontouchmove = null;
-                saveCurrentPageSignatures(); // Auto-save after moving/resizing
+                document.onpointerup = null; document.onpointermove = null; document.ontouchend = null; document.ontouchmove = null;
+                saveCurrentPageSignatures(); 
             }
         }
 
         async function processSign() {
             if(!state.files.sign) return toast(t('msg_err_pdf'),'error');
-            saveCurrentPageSignatures(); // Ensure current page is saved
-
+            saveCurrentPageSignatures(); 
             let hasSignatures = false;
-            for (const page in signWorkspace.data) {
-                if (signWorkspace.data[page] && signWorkspace.data[page].length > 0) hasSignatures = true;
-            }
-
-            if (!hasSignatures) {
-                return toast(t('msg_no_text_added'), 'warning');
-            }
+            for (const page in signWorkspace.data) if (signWorkspace.data[page] && signWorkspace.data[page].length > 0) hasSignatures = true;
+            if (!hasSignatures) return toast(t('msg_no_text_added'), 'warning');
 
             showLoading(t('loading_apply_sig'));
             try {
                 const doc = await PDFDocument.load(await state.files.sign.arrayBuffer());
-                
-                // Iterate over saved state and draw
                 for (const [pageNumStr, sigs] of Object.entries(signWorkspace.data)) {
                     if (sigs.length === 0) continue;
-                    
-                    const pageIndex = parseInt(pageNumStr) - 1;
-                    const page = doc.getPage(pageIndex);
+                    const page = doc.getPage(parseInt(pageNumStr) - 1);
                     const { width, height } = page.getSize();
-
                     for (const sig of sigs) {
                         const sigImage = await doc.embedPng(sig.img);
-                        
-                        // Calculate absolute size on PDF
-                        const finalW = sig.w * width;
-                        const finalH = sig.h * height;
-                        const finalX = sig.x * width;
-                        
-                        // PDF Y is inverted (0 is bottom)
-                        const finalY = height - (sig.y * height) - finalH;
-
-                        page.drawImage(sigImage, {
-                            x: finalX,
-                            y: finalY,
-                            width: finalW,
-                            height: finalH
-                        });
+                        page.drawImage(sigImage, { x: sig.x * width, y: height - (sig.y * height) - (sig.h * height), width: sig.w * width, height: sig.h * height });
                     }
                 }
-
                 downloadBlob(new Blob([await doc.save()],{type:'application/pdf'}), `${getOutputName('sign','signed')}.pdf`);
                 toast(t('msg_done'));
-            } catch(e) {
-                toast(e.message,'error')
-            } 
-            hideLoading();
+            } catch(e) { toast(e.message,'error') } hideLoading();
         }
 
-        // --- Add Text Visual Workspace Logic ---
-        const addtextWorkspace = {
-            pdf: null,
-            currentPage: 1,
-            totalPages: 1,
-            data: {} // Format: { pageNum: [ { id, text, font, color, x, y, w, h } ] }
-        };
+        // --- Advanced Editor Visual Workspace Logic (Replacing old Add Text) ---
+        const addtextWorkspace = { pdf: null, currentPage: 1, totalPages: 1, scale: 1.5, data: {} };
+        let isDrawMode = false;
+        let drawType = 'draw'; // 'draw' or 'highlight'
+        let activeEditorObject = null;
+        let editorHistory = [];
+        let editorHistoryIndex = -1;
 
         function resetAddTextWorkspace() {
-            addtextWorkspace.pdf = null;
-            addtextWorkspace.currentPage = 1;
-            addtextWorkspace.totalPages = 1;
-            addtextWorkspace.data = {};
+            addtextWorkspace.pdf = null; addtextWorkspace.currentPage = 1; addtextWorkspace.totalPages = 1; addtextWorkspace.scale = 1.5; addtextWorkspace.data = {};
+            editorHistory = []; editorHistoryIndex = -1; isDrawMode = false; drawType = 'draw';
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('draw-overlay').style.display = 'none';
             document.getElementById('addtext-workspace').style.display = 'none';
-            document.getElementById('addtext-pdf-wrapper').querySelectorAll('.draggable-text').forEach(el => el.remove());
+            document.getElementById('addtext-pdf-wrapper').querySelectorAll('.draggable-obj').forEach(el => el.remove());
         }
 
         async function initAddTextPreview(file) {
             try {
-                showLoading(t('loading_init'));
-                resetAddTextWorkspace();
+                showLoading(t('loading_init')); resetAddTextWorkspace();
                 addtextWorkspace.pdf = await pdfjsLib.getDocument(await file.arrayBuffer()).promise;
                 addtextWorkspace.totalPages = addtextWorkspace.pdf.numPages;
                 document.getElementById('addtext-workspace').style.display = 'block';
                 document.getElementById('addtext-total-pages').innerText = addtextWorkspace.totalPages;
-                await renderAddTextPage(1);
+                await renderAddTextPage(1); 
+                setupDrawOverlay();
+                saveEditorState(); // Init history
                 hideLoading();
-            } catch(e) {
-                hideLoading();
-                toast(e.message, 'error');
-            }
+            } catch(e) { hideLoading(); toast(e.message, 'error'); }
         }
 
         async function renderAddTextPage(pageNum) {
@@ -1104,150 +1047,471 @@
             document.getElementById('addtext-btn-next').disabled = pageNum >= addtextWorkspace.totalPages;
 
             const page = await addtextWorkspace.pdf.getPage(pageNum);
-            const viewport = page.getViewport({ scale: 1.5 });
+            const viewport = page.getViewport({ scale: addtextWorkspace.scale });
             const canvas = document.getElementById('addtext-pdf-canvas-preview');
-            const context = canvas.getContext('2d');
+            canvas.height = viewport.height; canvas.width = viewport.width;
+
+            const overlay = document.getElementById('draw-overlay');
+            overlay.width = viewport.width; overlay.height = viewport.height;
             
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
-
-            await page.render({ canvasContext: context, viewport: viewport }).promise;
-
             const wrapper = document.getElementById('addtext-pdf-wrapper');
-            wrapper.querySelectorAll('.draggable-text').forEach(el => el.remove());
+            wrapper.style.width = viewport.width + 'px';
+            wrapper.style.height = viewport.height + 'px';
+
+            await page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise;
+
+            wrapper.querySelectorAll('.draggable-obj').forEach(el => el.remove());
             
             if (addtextWorkspace.data[pageNum]) {
-                addtextWorkspace.data[pageNum].forEach(tData => {
-                    createAddTextElement(tData.text, tData.font, tData.color, tData.x, tData.y, tData.w, tData.h, tData.rot || 0, tData.id);
+                addtextWorkspace.data[pageNum].forEach(obj => {
+                    createEditorElementFromState(obj);
                 });
             }
+            setActiveEditorObject(null);
         }
 
         async function changeAddTextPage(delta) {
-            saveCurrentPageTexts();
+            saveCurrentPageObjects();
             const newPage = addtextWorkspace.currentPage + delta;
-            if (newPage >= 1 && newPage <= addtextWorkspace.totalPages) {
-                await renderAddTextPage(newPage);
-            }
+            if (newPage >= 1 && newPage <= addtextWorkspace.totalPages) await renderAddTextPage(newPage);
+        }
+        
+        async function changeEditorZoom(delta) {
+            let newScale = addtextWorkspace.scale + delta;
+            if(newScale < 0.5) newScale = 0.5;
+            if(newScale > 3.0) newScale = 3.0;
+            addtextWorkspace.scale = newScale;
+            document.getElementById('addtext-zoom-val').innerText = Math.round(newScale * 100) + '%';
+            
+            saveCurrentPageObjects();
+            showLoading(t('msg_processing'));
+            await renderAddTextPage(addtextWorkspace.currentPage);
+            hideLoading();
         }
 
-        function saveCurrentPageTexts() {
+        function saveCurrentPageObjects() {
             const wrapper = document.getElementById('addtext-pdf-wrapper');
             const wrapperRect = wrapper.getBoundingClientRect();
-            const texts = wrapper.querySelectorAll('.draggable-text');
+            const objs = wrapper.querySelectorAll('.draggable-obj');
             
             const pageData = [];
-            texts.forEach(tEl => {
-                const text = tEl.getAttribute('data-text');
-                const font = tEl.getAttribute('data-font');
-                const color = tEl.getAttribute('data-color');
-                const rot = parseFloat(tEl.getAttribute('data-rotation')) || 0;
-                const x = tEl.offsetLeft / wrapperRect.width;
-                const y = tEl.offsetTop / wrapperRect.height;
-                const w = tEl.offsetWidth / wrapperRect.width;
-                const h = tEl.offsetHeight / wrapperRect.height;
-                pageData.push({ id: tEl.id, text, font, color, x, y, w, h, rot });
+            objs.forEach(el => {
+                const type = el.getAttribute('data-type');
+                const rot = parseFloat(el.getAttribute('data-rotation')) || 0;
+                const z = parseInt(el.style.zIndex) || 100;
+                const op = parseFloat(el.getAttribute('data-opacity')) || 1;
+                const x = el.offsetLeft / wrapperRect.width;
+                const y = el.offsetTop / wrapperRect.height;
+                const w = el.offsetWidth / wrapperRect.width;
+                const h = el.offsetHeight / wrapperRect.height;
+                
+                const obj = { id: el.id, type, x, y, w, h, rot, z, opacity: op };
+                if(type === 'text') {
+                    obj.text = el.getAttribute('data-text');
+                    obj.font = el.getAttribute('data-font');
+                    obj.fill = el.getAttribute('data-fill');
+                } else if(['rect', 'circle', 'line', 'arrow'].includes(type)) {
+                    obj.fill = el.getAttribute('data-fill');
+                    obj.stroke = el.getAttribute('data-stroke');
+                    obj.strokeW = parseInt(el.getAttribute('data-strokew'));
+                } else if(type === 'draw' || type === 'image') {
+                    obj.img = el.getAttribute('data-img');
+                }
+                pageData.push(obj);
             });
-            
             addtextWorkspace.data[addtextWorkspace.currentPage] = pageData;
         }
 
-        function addTextToPreview() {
-            const textVal = document.getElementById('text-addtext-val').value.trim();
-            if (!textVal) return toast(t('msg_err_empty_text'), 'error');
-
-            const fontVal = document.getElementById('font-addtext-val').value;
-            const colorVal = document.getElementById('color-addtext-val').value;
-
-            createAddTextElement(textVal, fontVal, colorVal, 0.2, 0.4, 0.5, 0.1, 0, 'txt_' + Date.now());
-            toast(t('msg_text_added'));
+        function saveEditorState() {
+            saveCurrentPageObjects();
+            editorHistory = editorHistory.slice(0, editorHistoryIndex + 1);
+            editorHistory.push(JSON.stringify(addtextWorkspace.data));
+            editorHistoryIndex++;
         }
 
-        function createAddTextElement(text, font, color, relX, relY, relW, relH, rot, id) {
+        function editorUndo() {
+            if (editorHistoryIndex > 0) {
+                editorHistoryIndex--;
+                addtextWorkspace.data = JSON.parse(editorHistory[editorHistoryIndex]);
+                renderAddTextPage(addtextWorkspace.currentPage);
+            }
+        }
+
+        function editorRedo() {
+            if (editorHistoryIndex < editorHistory.length - 1) {
+                editorHistoryIndex++;
+                addtextWorkspace.data = JSON.parse(editorHistory[editorHistoryIndex]);
+                renderAddTextPage(addtextWorkspace.currentPage);
+            }
+        }
+        
+        function clearPageObjects() {
+            if(confirm('คุณแน่ใจหรือไม่ว่าต้องการล้างวัตถุทั้งหมดในหน้านี้?')) {
+                document.getElementById('addtext-pdf-wrapper').querySelectorAll('.draggable-obj').forEach(el => el.remove());
+                activeEditorObject = null;
+                saveEditorState();
+            }
+        }
+
+        function activateDrawMode(type) {
+            isDrawMode = true;
+            drawType = type;
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.tool-btn[data-tool="${type}"]`).classList.add('active');
+            document.getElementById('draw-overlay').style.display = 'block';
+            setActiveEditorObject(null);
+        }
+
+        function spawnEditorObject(type) {
+            isDrawMode = false; 
+            document.getElementById('draw-overlay').style.display = 'none';
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.tool-btn[data-tool="${type}"]`).classList.add('active');
+            
+            const isTransparent = document.getElementById('ed-fill-trans').checked;
+            const fill = isTransparent ? 'transparent' : document.getElementById('ed-fill').value;
+            const stroke = document.getElementById('ed-stroke').value;
+            const strokeW = parseInt(document.getElementById('ed-stroke-w').value);
+            const fontVal = document.getElementById('font-addtext-val').value;
+            const opacity = parseFloat(document.getElementById('ed-opacity').value) / 100;
+            
+            const wrapperRect = document.getElementById('addtext-pdf-wrapper').getBoundingClientRect();
+            const ratio = wrapperRect.width / wrapperRect.height;
+            
+            const obj = {
+                id: 'obj_' + Date.now(), type: type,
+                x: 0.3, y: 0.4, w: 0.4, h: 0.1, rot: 0, z: 100 + document.querySelectorAll('.draggable-obj').length, opacity: opacity,
+                text: "ข้อความใหม่", font: fontVal, fill: type === 'text' ? document.getElementById('ed-fill').value : fill, stroke: stroke, strokeW: strokeW
+            };
+            
+            if(type === 'circle' || type === 'rect') { obj.w = 0.2; obj.h = 0.2 * ratio; }
+            if(type === 'line' || type === 'arrow') { obj.w = 0.3; obj.h = Math.max(0.02, (strokeW*2)/wrapperRect.height); }
+            
+            const el = createEditorElementFromState(obj);
+            saveEditorState();
+            
+            if(type === 'text') {
+                const span = el.querySelector('span');
+                span.ondblclick(); // Enter edit mode immediately
+                const range = document.createRange();
+                range.selectNodeContents(span);
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }
+        }
+        
+        function duplicateActiveObject() {
+            if(!activeEditorObject) return toast(t('คลิกเลือกวัตถุก่อน', 'warning'));
+            const el = activeEditorObject;
+            const wrapperRect = document.getElementById('addtext-pdf-wrapper').getBoundingClientRect();
+            
+            const type = el.getAttribute('data-type');
+            const obj = {
+                id: 'obj_' + Date.now(), type: type,
+                x: (el.offsetLeft / wrapperRect.width) + 0.02, // Offset slightly
+                y: (el.offsetTop / wrapperRect.height) + 0.02,
+                w: el.offsetWidth / wrapperRect.width,
+                h: el.offsetHeight / wrapperRect.height,
+                rot: parseFloat(el.getAttribute('data-rotation')) || 0,
+                opacity: parseFloat(el.getAttribute('data-opacity')) || 1,
+                z: 100 + document.querySelectorAll('.draggable-obj').length
+            };
+            
+            if(type === 'text') {
+                obj.text = el.getAttribute('data-text');
+                obj.font = el.getAttribute('data-font');
+                obj.fill = el.getAttribute('data-fill');
+            } else if(['rect', 'circle', 'line', 'arrow'].includes(type)) {
+                obj.fill = el.getAttribute('data-fill');
+                obj.stroke = el.getAttribute('data-stroke');
+                obj.strokeW = parseInt(el.getAttribute('data-strokew'));
+            } else if(type === 'draw' || type === 'image') {
+                obj.img = el.getAttribute('data-img');
+            }
+            
+            createEditorElementFromState(obj);
+            saveEditorState();
+            toast('คัดลอกวัตถุแล้ว');
+        }
+
+        function addEditorImage(input) {
+            if (!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width; canvas.height = img.height;
+                    canvas.getContext('2d').drawImage(img, 0, 0);
+                    const dataUrl = canvas.toDataURL('image/png'); // Standardize to PNG
+                    
+                    const wrapperRect = document.getElementById('addtext-pdf-wrapper').getBoundingClientRect();
+                    const wrapperRatio = wrapperRect.width / wrapperRect.height;
+                    const opacity = parseFloat(document.getElementById('ed-opacity').value) / 100;
+                    
+                    const obj = {
+                        id: 'img_' + Date.now(), type: 'image', img: dataUrl,
+                        x: 0.3, y: 0.3, w: 0.4, h: 0.4 * wrapperRatio * (img.height / img.width), rot: 0, opacity: opacity, z: 100 + document.querySelectorAll('.draggable-obj').length
+                    };
+                    createEditorElementFromState(obj);
+                    saveEditorState();
+                    input.value = ''; // reset
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function updateFillProperty() {
+            const isTrans = document.getElementById('ed-fill-trans').checked;
+            const color = document.getElementById('ed-fill').value;
+            updateActiveObjectProperty('fill', isTrans ? 'transparent' : color);
+        }
+
+        function updateActiveObjectProperty(prop, value) {
+            if (!activeEditorObject) return;
+            const type = activeEditorObject.getAttribute('data-type');
+            
+            if (prop === 'fill') {
+                activeEditorObject.setAttribute('data-fill', value);
+                if (type === 'text') {
+                    activeEditorObject.querySelector('span').style.color = value;
+                } else if (['rect', 'circle'].includes(type)) {
+                    activeEditorObject.querySelector('.obj-content > div').style.background = value;
+                }
+            } else if (prop === 'stroke') {
+                activeEditorObject.setAttribute('data-stroke', value);
+                if (['rect', 'circle'].includes(type)) {
+                    activeEditorObject.querySelector('.obj-content > div').style.borderColor = value;
+                } else if (['line'].includes(type)) {
+                    activeEditorObject.querySelector('.obj-content > div').style.background = value;
+                } else if (['arrow'].includes(type)) {
+                    rebuildArrow(activeEditorObject);
+                }
+            } else if (prop === 'strokeW') {
+                activeEditorObject.setAttribute('data-strokew', value);
+                if (['rect', 'circle'].includes(type)) {
+                    activeEditorObject.querySelector('.obj-content > div').style.borderWidth = value + 'px';
+                } else if (['line'].includes(type)) {
+                    activeEditorObject.querySelector('.obj-content > div').style.height = value + 'px';
+                } else if (['arrow'].includes(type)) {
+                    rebuildArrow(activeEditorObject);
+                }
+            } else if (prop === 'font' && type === 'text') {
+                activeEditorObject.setAttribute('data-font', value);
+                activeEditorObject.querySelector('span').style.fontFamily = value;
+            } else if (prop === 'opacity') {
+                activeEditorObject.setAttribute('data-opacity', value);
+                activeEditorObject.style.opacity = value;
+            }
+            saveEditorState();
+        }
+
+        function rebuildArrow(el) {
+            const stroke = el.getAttribute('data-stroke');
+            const strokeW = parseInt(el.getAttribute('data-strokew'));
+            const aw = Math.max(10, strokeW*3);
+            el.querySelector('.obj-content').innerHTML = `<div style="position:relative; width:100%; height:100%; display:flex; align-items:center;">
+                <div style="width:100%; height:${strokeW}px; background:${stroke};"></div>
+                <div style="position:absolute; right:-${aw/2}px; top:50%; transform:translateY(-50%); width:0; height:0; border-top:${aw*0.8}px solid transparent; border-bottom:${aw*0.8}px solid transparent; border-left:${aw}px solid ${stroke};"></div>
+            </div>`;
+        }
+
+        function createEditorElementFromState(obj) {
             const wrapper = document.getElementById('addtext-pdf-wrapper');
             const wrapperRect = wrapper.getBoundingClientRect();
             
-            const txtDiv = document.createElement('div');
-            txtDiv.className = 'draggable-text';
-            txtDiv.id = id;
-            txtDiv.setAttribute('data-text', text);
-            txtDiv.setAttribute('data-font', font);
-            txtDiv.setAttribute('data-color', color);
-            txtDiv.setAttribute('data-rotation', rot);
+            const el = document.createElement('div');
+            el.className = 'draggable-obj';
+            el.id = obj.id;
+            el.setAttribute('data-type', obj.type);
+            el.setAttribute('data-rotation', obj.rot);
+            el.setAttribute('data-opacity', obj.opacity !== undefined ? obj.opacity : 1);
+            el.style.zIndex = obj.z;
+            el.style.opacity = obj.opacity !== undefined ? obj.opacity : 1;
             
-            txtDiv.style.left = (relX * wrapperRect.width) + 'px';
-            txtDiv.style.top = (relY * wrapperRect.height) + 'px';
-            txtDiv.style.width = (relW * wrapperRect.width) + 'px';
-            txtDiv.style.height = (relH * wrapperRect.height) + 'px';
-            txtDiv.style.transform = `rotate(${rot}deg)`;
-            txtDiv.style.color = color;
-            txtDiv.style.fontFamily = font;
+            el.style.left = (obj.x * wrapperRect.width) + 'px';
+            el.style.top = (obj.y * wrapperRect.height) + 'px';
+            el.style.width = (obj.w * wrapperRect.width) + 'px';
+            el.style.height = (obj.h * wrapperRect.height) + 'px';
+            el.style.transform = `rotate(${obj.rot}deg)`;
 
-            const span = document.createElement('span');
-            span.innerText = text;
-            span.style.fontSize = (relH * wrapperRect.height * 0.7) + 'px'; // Scale font size
+            let contentHTML = '';
+            if(obj.type === 'text') {
+                el.setAttribute('data-text', obj.text); el.setAttribute('data-font', obj.font); el.setAttribute('data-fill', obj.fill);
+                const fs = (obj.h * wrapperRect.height * 0.7);
+                contentHTML = `<span style="color:${obj.fill}; font-family:${obj.font}; font-size:${fs}px; outline:none;">${obj.text}</span>`;
+            } else if (['rect', 'circle', 'line', 'arrow'].includes(obj.type)) {
+                el.setAttribute('data-fill', obj.fill); el.setAttribute('data-stroke', obj.stroke); el.setAttribute('data-strokew', obj.strokeW);
+                if(obj.type === 'rect') contentHTML = `<div style="width:100%; height:100%; background:${obj.fill}; border:${obj.strokeW}px solid ${obj.stroke}; box-sizing:border-box;"></div>`;
+                if(obj.type === 'circle') contentHTML = `<div style="width:100%; height:100%; background:${obj.fill}; border:${obj.strokeW}px solid ${obj.stroke}; border-radius:50%; box-sizing:border-box;"></div>`;
+                if(obj.type === 'line') contentHTML = `<div style="width:100%; height:${obj.strokeW}px; background:${obj.stroke};"></div>`;
+                if(obj.type === 'arrow') {
+                    const aw = Math.max(10, obj.strokeW*3);
+                    contentHTML = `<div style="position:relative; width:100%; height:100%; display:flex; align-items:center;">
+                        <div style="width:100%; height:${obj.strokeW}px; background:${obj.stroke};"></div>
+                        <div style="position:absolute; right:-${aw/2}px; top:50%; transform:translateY(-50%); width:0; height:0; border-top:${aw*0.8}px solid transparent; border-bottom:${aw*0.8}px solid transparent; border-left:${aw}px solid ${obj.stroke};"></div>
+                    </div>`;
+                }
+            } else if (obj.type === 'draw' || obj.type === 'image') {
+                el.setAttribute('data-img', obj.img);
+                contentHTML = `<img src="${obj.img}" style="width:100%; height:100%; object-fit:fill; pointer-events:none;">`;
+            }
 
-            const resizer = document.createElement('div');
-            resizer.className = 'text-resizer';
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'obj-content';
+            contentDiv.innerHTML = contentHTML;
+            el.appendChild(contentDiv);
 
-            const rotator = document.createElement('div');
-            rotator.className = 'text-rotator';
-            
-            const deleter = document.createElement('div');
-            deleter.className = 'text-deleter';
+            const resizer = document.createElement('div'); resizer.className = 'obj-resizer';
+            const rotator = document.createElement('div'); rotator.className = 'obj-rotator';
+            const deleter = document.createElement('div'); deleter.className = 'obj-deleter';
             deleter.innerHTML = '<i class="fas fa-times"></i>';
-            deleter.onclick = function() { txtDiv.remove(); saveCurrentPageTexts(); };
+            deleter.onclick = function(e) { e.stopPropagation(); el.remove(); setActiveEditorObject(null); saveEditorState(); };
 
-            txtDiv.appendChild(span);
-            txtDiv.appendChild(resizer);
-            txtDiv.appendChild(rotator);
-            txtDiv.appendChild(deleter);
-            wrapper.appendChild(txtDiv);
+            el.appendChild(resizer); el.appendChild(rotator); el.appendChild(deleter);
+            
+            if(obj.type === 'text') {
+                const span = el.querySelector('span');
+                span.ondblclick = function(e) {
+                    this.contentEditable = true; this.focus(); this.style.cursor = 'text';
+                    makeEditorElementDraggable(el, false);
+                };
+                span.onblur = function() {
+                    this.contentEditable = false; this.style.cursor = 'default';
+                    if(this.innerText.trim() === '') {
+                        el.remove(); setActiveEditorObject(null);
+                    } else {
+                        el.setAttribute('data-text', this.innerText);
+                        makeEditorElementDraggable(el, true);
+                    }
+                    saveEditorState();
+                };
+                span.onkeydown = function(e) {
+                    if(e.key === 'Escape') this.blur();
+                };
+            }
 
-            makeTextElementDraggableAndResizable(txtDiv, span);
+            el.addEventListener('mousedown', (e) => { e.stopPropagation(); setActiveEditorObject(el); });
+            el.addEventListener('touchstart', (e) => { e.stopPropagation(); setActiveEditorObject(el); }, {passive: false});
+
+            wrapper.appendChild(el);
+            makeEditorElementDraggable(el);
+            setActiveEditorObject(el);
+            return el;
         }
 
-        function makeTextElementDraggableAndResizable(elmnt, spanEl) {
-            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-            let startW = 0, startH = 0, startX = 0, startY = 0;
-            let isResizing = false;
-            let isRotating = false;
-            let startAngle = 0;
+        function setActiveEditorObject(el) {
+            document.querySelectorAll('.draggable-obj').forEach(o => o.classList.remove('active-obj'));
+            if(el) {
+                el.classList.add('active-obj');
+                activeEditorObject = el;
+                
+                const opacity = el.getAttribute('data-opacity');
+                document.getElementById('ed-opacity').value = opacity ? Math.round(parseFloat(opacity) * 100) : 100;
+
+                const type = el.getAttribute('data-type');
+                if(type === 'text') {
+                    document.getElementById('font-addtext-val').value = el.getAttribute('data-font');
+                    const fill = el.getAttribute('data-fill');
+                    document.getElementById('ed-fill').value = fill === 'transparent' ? '#000000' : fill;
+                    document.getElementById('ed-fill-trans').checked = false; 
+                } else if (['rect', 'circle', 'line', 'arrow'].includes(type)) {
+                    const fill = el.getAttribute('data-fill');
+                    const stroke = el.getAttribute('data-stroke');
+                    const strokeW = el.getAttribute('data-strokew');
+                    
+                    if(fill) {
+                        document.getElementById('ed-fill').value = fill === 'transparent' ? '#000000' : fill;
+                        document.getElementById('ed-fill-trans').checked = (fill === 'transparent');
+                    }
+                    if(stroke) document.getElementById('ed-stroke').value = stroke;
+                    if(strokeW) document.getElementById('ed-stroke-w').value = strokeW;
+                }
+            } else {
+                activeEditorObject = null;
+            }
+        }
+        
+        function deselectAllObjects(e) {
+            if(e.target.id === 'addtext-pdf-wrapper' || e.target.id === 'addtext-pdf-canvas-preview') {
+                setActiveEditorObject(null);
+            }
+        }
+
+        function layerActive(dir) {
+            if(!activeEditorObject) return toast(t('คลิกเลือกวัตถุก่อน', 'warning'));
+            
+            const wrapper = document.getElementById('addtext-pdf-wrapper');
+            const objs = wrapper.querySelectorAll('.draggable-obj');
+            let minZ = 100000, maxZ = -100000;
+            
+            objs.forEach(o => {
+                if (o !== activeEditorObject) {
+                    const z = parseInt(o.style.zIndex) || 100;
+                    if (z < minZ) minZ = z;
+                    if (z > maxZ) maxZ = z;
+                }
+            });
+
+            if (objs.length <= 1) return; // มีแค่วัตถุเดียว ไม่ต้องสลับ
+            
+            if (minZ === 100000) minZ = 100;
+            if (maxZ === -100000) maxZ = 100;
+
+            if (dir > 0) {
+                // นำไปไว้หน้าสุด
+                activeEditorObject.style.zIndex = maxZ + 1;
+            } else {
+                // ส่งไปไว้หลังสุด (ห้ามค่าน้อยกว่า 1 เพื่อป้องกันปัญหาวัตถุหายไปหลังกระดาษ)
+                let newZ = minZ - 1;
+                if (newZ < 1) newZ = 1;
+                activeEditorObject.style.zIndex = newZ;
+                
+                // ถ้าระดับต่ำสุดเป็น 1 แล้ว ให้ดันวัตถุอื่นๆ ขึ้นไปให้หมดแทน เพื่อให้เราอยู่หลังสุดจริงๆ
+                if (newZ === 1) {
+                    objs.forEach(o => {
+                        o.style.zIndex = (parseInt(o.style.zIndex) || 100) + 10;
+                    });
+                    activeEditorObject.style.zIndex = 10;
+                }
+            }
+            saveEditorState();
+        }
+
+        function makeEditorElementDraggable(elmnt, enable = true) {
+            if(!enable) { elmnt.onpointerdown = null; return; }
+            
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0, startW = 0, startH = 0, startX = 0, startY = 0;
+            let isResizing = false, isRotating = false, startAngle = 0;
             let currentRotation = parseFloat(elmnt.getAttribute('data-rotation')) || 0;
 
             elmnt.onpointerdown = dragMouseDown;
 
             function dragMouseDown(e) {
-                e.preventDefault();
-                if (e.target.className.includes('text-deleter')) return;
+                e.stopPropagation(); setActiveEditorObject(elmnt);
+                if (e.target.className.includes('obj-deleter') || e.target.tagName === 'SPAN' && e.target.contentEditable === "true") return;
 
-                if (e.target.className.includes('text-resizer')) {
-                    isResizing = true;
-                    isRotating = false;
-                    startW = elmnt.offsetWidth;
-                    startH = elmnt.offsetHeight;
-                    startX = e.clientX || e.touches[0].clientX;
-                    startY = e.clientY || e.touches[0].clientY;
-                } else if (e.target.className.includes('text-rotator')) {
-                    isRotating = true;
-                    isResizing = false;
+                if (e.target.className.includes('obj-resizer')) {
+                    isResizing = true; isRotating = false;
+                    startW = elmnt.offsetWidth; startH = elmnt.offsetHeight;
+                    startX = e.clientX || e.touches[0].clientX; startY = e.clientY || e.touches[0].clientY;
+                } else if (e.target.className.includes('obj-rotator')) {
+                    isRotating = true; isResizing = false;
                     const rect = elmnt.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
+                    const centerX = rect.left + rect.width / 2; const centerY = rect.top + rect.height / 2;
                     const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
                     const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
                     startAngle = Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI) - currentRotation;
                 } else {
-                    isResizing = false;
-                    isRotating = false;
-                    pos3 = e.clientX || e.touches[0].clientX;
-                    pos4 = e.clientY || e.touches[0].clientY;
+                    isResizing = false; isRotating = false; e.preventDefault(); 
+                    pos3 = e.clientX || e.touches[0].clientX; pos4 = e.clientY || e.touches[0].clientY;
                 }
                 
-                document.onpointerup = closeDragElement;
-                document.onpointermove = elementDrag;
-                document.ontouchend = closeDragElement;
-                document.ontouchmove = elementDrag;
+                document.onpointerup = closeDragElement; document.onpointermove = elementDrag;
+                document.ontouchend = closeDragElement; document.ontouchmove = elementDrag;
             }
 
             function elementDrag(e) {
@@ -1255,39 +1519,64 @@
                 const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
                 const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
                 const wrapper = document.getElementById('addtext-pdf-wrapper');
+                const guideX = document.getElementById('snap-guide-x');
+                const guideY = document.getElementById('snap-guide-y');
 
                 if (isResizing) {
-                    const diffX = clientX - startX;
-                    const diffY = clientY - startY;
-                    let newW = startW + diffX;
-                    let newH = startH + diffY;
-                    
-                    if (newW > 40) elmnt.style.width = newW + "px";
-                    if (newH > 24) {
+                    let newW = startW + (clientX - startX); let newH = startH + (clientY - startY);
+                    if (newW > 20) elmnt.style.width = newW + "px";
+                    if (newH > 20) {
                         elmnt.style.height = newH + "px";
-                        spanEl.style.fontSize = (newH * 0.7) + 'px'; // Scale font size relative to box height
+                        if(elmnt.getAttribute('data-type') === 'text') {
+                            elmnt.querySelector('span').style.fontSize = (newH * 0.7) + 'px';
+                        }
                     }
                 } else if (isRotating) {
-                    const wrapperRect = wrapper.getBoundingClientRect();
-                    const centerX = wrapperRect.left + elmnt.offsetLeft + elmnt.offsetWidth / 2;
-                    const centerY = wrapperRect.top + elmnt.offsetTop + elmnt.offsetHeight / 2;
+                    const rect = wrapper.getBoundingClientRect();
+                    const centerX = rect.left + elmnt.offsetLeft + elmnt.offsetWidth / 2;
+                    const centerY = rect.top + elmnt.offsetTop + elmnt.offsetHeight / 2;
                     const angle = Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
-                    currentRotation = angle - startAngle;
+                    
+                    let rawRotation = angle - startAngle;
+                    const snapStep = 45; const snapTolerance = 10;
+                    const nearestSnap = Math.round(rawRotation / snapStep) * snapStep;
+                    currentRotation = (e.shiftKey || Math.abs(rawRotation - nearestSnap) <= snapTolerance) ? nearestSnap : rawRotation;
+                    
                     elmnt.style.transform = `rotate(${currentRotation}deg)`;
                     elmnt.setAttribute('data-rotation', currentRotation);
                 } else {
-                    pos1 = pos3 - clientX;
-                    pos2 = pos4 - clientY;
-                    pos3 = clientX;
-                    pos4 = clientY;
+                    pos1 = pos3 - clientX; pos2 = pos4 - clientY;
+                    pos3 = clientX; pos4 = clientY;
 
                     let newTop = elmnt.offsetTop - pos2;
                     let newLeft = elmnt.offsetLeft - pos1;
-
-                    if (newTop < 0) newTop = 0;
-                    if (newLeft < 0) newLeft = 0;
+                    
+                    if (newTop < 0) newTop = 0; if (newLeft < 0) newLeft = 0;
                     if (newTop + elmnt.offsetHeight > wrapper.offsetHeight) newTop = wrapper.offsetHeight - elmnt.offsetHeight;
                     if (newLeft + elmnt.offsetWidth > wrapper.offsetWidth) newLeft = wrapper.offsetWidth - elmnt.offsetWidth;
+
+                    // --- Snapping Guides ---
+                    guideX.style.display = 'none'; guideY.style.display = 'none';
+                    if(!e.altKey) { 
+                        const boxCX = newLeft + elmnt.offsetWidth / 2;
+                        const boxCY = newTop + elmnt.offsetHeight / 2;
+                        const others = wrapper.querySelectorAll(`.draggable-obj:not(#${elmnt.id})`);
+                        
+                        for(let i=0; i<others.length; i++) {
+                            const other = others[i];
+                            const oCX = other.offsetLeft + other.offsetWidth / 2;
+                            const oCY = other.offsetTop + other.offsetHeight / 2;
+                            
+                            if(Math.abs(boxCX - oCX) < 8) {
+                                newLeft = oCX - elmnt.offsetWidth / 2;
+                                guideX.style.display = 'block'; guideX.style.left = oCX + 'px';
+                            }
+                            if(Math.abs(boxCY - oCY) < 8) {
+                                newTop = oCY - elmnt.offsetHeight / 2;
+                                guideY.style.display = 'block'; guideY.style.top = oCY + 'px';
+                            }
+                        }
+                    }
 
                     elmnt.style.top = newTop + "px";
                     elmnt.style.left = newLeft + "px";
@@ -1295,101 +1584,210 @@
             }
 
             function closeDragElement() {
-                document.onpointerup = null;
-                document.onpointermove = null;
-                document.ontouchend = null;
-                document.ontouchmove = null;
-                saveCurrentPageTexts();
+                document.onpointerup = null; document.onpointermove = null; document.ontouchend = null; document.ontouchmove = null;
+                document.getElementById('snap-guide-x').style.display = 'none';
+                document.getElementById('snap-guide-y').style.display = 'none';
+                saveEditorState();
             }
+        }
+
+        // --- Freehand Drawing Logic for Editor ---
+        function setupDrawOverlay() {
+            const edCanvas = document.getElementById('draw-overlay');
+            const edCtx = edCanvas.getContext('2d');
+            let isEditorDrawing = false;
+            
+            const start = (e) => {
+                if(!isDrawMode) return;
+                isEditorDrawing = true; edCtx.beginPath();
+                const pos = getEvPos(e, edCanvas);
+                edCtx.moveTo(pos.x, pos.y);
+                
+                if (drawType === 'highlight') {
+                    edCtx.strokeStyle = document.getElementById('ed-fill').value;
+                    edCtx.lineWidth = Math.max(15, parseInt(document.getElementById('ed-stroke-w').value) * 4);
+                    edCtx.globalAlpha = 0.4;
+                } else {
+                    edCtx.strokeStyle = document.getElementById('ed-stroke').value;
+                    edCtx.lineWidth = parseInt(document.getElementById('ed-stroke-w').value);
+                    edCtx.globalAlpha = parseFloat(document.getElementById('ed-opacity').value) / 100;
+                }
+                edCtx.lineCap = 'round'; edCtx.lineJoin = 'round';
+            };
+            const draw = (e) => {
+                if(!isEditorDrawing) return; e.preventDefault();
+                const pos = getEvPos(e, edCanvas);
+                edCtx.lineTo(pos.x, pos.y); edCtx.stroke();
+            };
+            const end = () => {
+                if(!isEditorDrawing) return; isEditorDrawing = false;
+                cropCanvasAndAddObject(edCanvas, edCtx);
+            };
+            
+            edCanvas.onmousedown = start; edCanvas.onmousemove = draw; edCanvas.onmouseup = end; edCanvas.onmouseleave = end;
+            edCanvas.ontouchstart = (e) => { if(isDrawMode) e.preventDefault(); start(e.touches[0]); }; 
+            edCanvas.ontouchmove = (e) => { if(isDrawMode) e.preventDefault(); draw(e.touches[0]); }; 
+            edCanvas.ontouchend = end;
+        }
+        
+        function getEvPos(e, cvs) {
+            const r = cvs.getBoundingClientRect();
+            const scaleX = cvs.width / r.width;
+            const scaleY = cvs.height / r.height;
+            const cx = e.clientX !== undefined ? e.clientX : e.touches[0].clientX;
+            const cy = e.clientY !== undefined ? e.clientY : e.touches[0].clientY;
+            return { x: (cx - r.left) * scaleX, y: (cy - r.top) * scaleY };
+        }
+
+        function cropCanvasAndAddObject(canvas, ctx) {
+            const w = canvas.width, h = canvas.height;
+            const imgData = ctx.getImageData(0,0,w,h).data;
+            let minX = w, minY = h, maxX = 0, maxY = 0, hasPixels = false;
+            for(let y=0; y<h; y++){
+                for(let x=0; x<w; x++){
+                    if(imgData[(y*w + x)*4 + 3] > 0) {
+                        hasPixels = true;
+                        if(x < minX) minX = x; if(x > maxX) maxX = x;
+                        if(y < minY) minY = y; if(y > maxY) maxY = y;
+                    }
+                }
+            }
+            if(!hasPixels) return;
+
+            minX = Math.max(0, minX-10); minY = Math.max(0, minY-10);
+            maxX = Math.min(w, maxX+10); maxY = Math.min(h, maxY+10);
+            const cropW = maxX - minX, cropH = maxY - minY;
+
+            const cropCanvas = document.createElement('canvas');
+            cropCanvas.width = cropW; cropCanvas.height = cropH;
+            cropCanvas.getContext('2d').putImageData(ctx.getImageData(minX, minY, cropW, cropH), 0, 0);
+
+            ctx.clearRect(0,0,w,h); 
+            
+            const obj = {
+                id: 'draw_' + Date.now(), type: 'draw', img: cropCanvas.toDataURL(),
+                x: minX / w, y: minY / h, w: cropW / w, h: cropH / h, rot: 0, 
+                opacity: drawType === 'highlight' ? 0.4 : (parseFloat(document.getElementById('ed-opacity').value) / 100),
+                z: 100 + document.querySelectorAll('.draggable-obj').length
+            };
+            createEditorElementFromState(obj);
+            saveEditorState();
         }
 
         function hexToRgb(hex) {
             const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return result ? {
-                r: parseInt(result[1], 16) / 255,
-                g: parseInt(result[2], 16) / 255,
-                b: parseInt(result[3], 16) / 255
-            } : { r: 0, g: 0, b: 0 };
+            return result ? { r: parseInt(result[1], 16) / 255, g: parseInt(result[2], 16) / 255, b: parseInt(result[3], 16) / 255 } : { r: 0, g: 0, b: 0 };
         }
 
         async function processAddText() {
             if(!state.files.addtext) return toast(t('msg_err_pdf'),'error');
-            saveCurrentPageTexts();
+            saveCurrentPageObjects();
 
-            let hasTexts = false;
+            let hasObjs = false;
             let fontsToLoad = new Set();
             for (const page in addtextWorkspace.data) {
                 if (addtextWorkspace.data[page] && addtextWorkspace.data[page].length > 0) {
-                    hasTexts = true;
-                    addtextWorkspace.data[page].forEach(t => fontsToLoad.add(t.font));
+                    hasObjs = true;
+                    addtextWorkspace.data[page].forEach(t => { if(t.type === 'text' && t.font) fontsToLoad.add(t.font); });
                 }
             }
 
-            if (!hasTexts) {
-                return toast(t('msg_no_text_added'), 'warning');
-            }
+            if (!hasObjs) return toast(t('msg_no_text_added'), 'warning');
 
             showLoading(t('loading_apply_txt'));
             try {
                 const doc = await PDFDocument.load(await state.files.addtext.arrayBuffer());
                 doc.registerFontkit(fontkit);
                 
-                // Load only used fonts
                 const embeddedFonts = {};
                 for (let fontName of fontsToLoad) {
                     const fontBytes = await fetchThaiFont(fontName);
                     embeddedFonts[fontName] = await doc.embedFont(fontBytes);
                 }
                 
-                for (const [pageNumStr, texts] of Object.entries(addtextWorkspace.data)) {
-                    if (texts.length === 0) continue;
+                for (const [pageNumStr, objs] of Object.entries(addtextWorkspace.data)) {
+                    if (objs.length === 0) continue;
                     
+                    objs.sort((a,b) => a.z - b.z); // Render in Layer Order
+
                     const pageIndex = parseInt(pageNumStr) - 1;
                     const page = doc.getPage(pageIndex);
                     const { width, height } = page.getSize();
 
-                    for (const txtObj of texts) {
-                        const customFont = embeddedFonts[txtObj.font];
-                        const rgbColor = hexToRgb(txtObj.color);
+                    for (const obj of objs) {
+                        const finalW = obj.w * width, finalH = obj.h * height;
+                        const finalX = obj.x * width, finalYTop = obj.y * height;
                         
-                        const finalW = txtObj.w * width;
-                        const finalH = txtObj.h * height;
-                        const finalX = txtObj.x * width;
-                        const finalYTop = txtObj.y * height;
-                        
-                        const fontSizeOnPdf = finalH * 0.7; // Base size on box height like in preview
-                        
-                        // หาจุดกึ่งกลางของกล่องข้อความ
                         const cx = finalX + finalW / 2;
                         const cy = height - finalYTop - finalH / 2;
+                        const rotRad = -obj.rot * (Math.PI / 180);
+                        const offsetX = -finalW / 2, offsetY = -finalH / 2; 
 
-                        const rot = txtObj.rot || 0;
-                        const rotRad = -rot * (Math.PI / 180); // แปลงมุมให้เข้ากับสมการทางคณิตศาสตร์ (ทวนเข็ม)
-
-                        // ตำแหน่งอ้างอิงของจุดเริ่มต้นการวาดข้อความ (แกนล่างซ้ายของกล่องข้อความ)
-                        const offsetX = -finalW / 2;
-                        const offsetY = -finalH / 2 + (finalH * 0.2); 
-
-                        // คำนวณพิกัดแกน X, Y ใหม่เมื่อมีการหมุนรอบจุดกึ่งกลาง (cx, cy)
                         const drawX = cx + (offsetX * Math.cos(rotRad) - offsetY * Math.sin(rotRad));
                         const drawY = cy + (offsetX * Math.sin(rotRad) + offsetY * Math.cos(rotRad));
+                        const rRot = degrees(-obj.rot);
 
-                        page.drawText(txtObj.text, {
-                            x: drawX,
-                            y: drawY,
-                            size: fontSizeOnPdf,
-                            font: customFont,
-                            color: rgb(rgbColor.r, rgbColor.g, rgbColor.b),
-                            rotate: degrees(-rot), // ใส่ค่าองศาการหมุนกลับทิศให้ PDF-Lib เข้าใจตรงกับ HTML
-                            lineHeight: fontSizeOnPdf * 1.2
-                        });
+                        const sColor = obj.stroke && obj.stroke !== 'transparent' ? hexToRgb(obj.stroke) : null;
+                        const fColor = obj.fill && obj.fill !== 'transparent' ? hexToRgb(obj.fill) : null;
+                        const sColorObj = sColor ? rgb(sColor.r, sColor.g, sColor.b) : undefined;
+                        const fColorObj = fColor ? rgb(fColor.r, fColor.g, fColor.b) : undefined;
+                        const sWidth = obj.strokeW || 0;
+                        const op = obj.opacity !== undefined ? obj.opacity : 1;
+
+                        if (obj.type === 'text') {
+                            const customFont = embeddedFonts[obj.font];
+                            const fontSizeOnPdf = finalH * 0.7; 
+                            const tColor = fColorObj || rgb(0,0,0);
+                            const tOffsetY = -finalH / 2 + (finalH * 0.2); 
+                            const tDrawX = cx + (offsetX * Math.cos(rotRad) - tOffsetY * Math.sin(rotRad));
+                            const tDrawY = cy + (offsetX * Math.sin(rotRad) + tOffsetY * Math.cos(rotRad));
+
+                            page.drawText(obj.text, {
+                                x: tDrawX, y: tDrawY, size: fontSizeOnPdf, font: customFont,
+                                color: tColor, rotate: rRot, lineHeight: fontSizeOnPdf * 1.2, opacity: op
+                            });
+                        } else if (obj.type === 'rect') {
+                            page.drawRectangle({
+                                x: drawX, y: drawY, width: finalW, height: finalH, rotate: rRot,
+                                borderColor: sColorObj, borderWidth: sWidth, color: fColorObj,
+                                opacity: op, borderOpacity: op
+                            });
+                        } else if (obj.type === 'circle') {
+                            page.drawEllipse({
+                                x: cx, y: cy, xScale: finalW/2, yScale: finalH/2, rotate: rRot,
+                                borderColor: sColorObj, borderWidth: sWidth, color: fColorObj,
+                                opacity: op, borderOpacity: op
+                            });
+                        } else if (obj.type === 'line') {
+                            const dx = (finalW/2) * Math.cos(rotRad); const dy = (finalW/2) * Math.sin(rotRad);
+                            page.drawLine({
+                                start: { x: cx - dx, y: cy - dy }, end: { x: cx + dx, y: cy + dy },
+                                color: sColorObj || rgb(0,0,0), thickness: sWidth || 1, opacity: op
+                            });
+                        } else if (obj.type === 'arrow') {
+                            const dx = (finalW/2) * Math.cos(rotRad); const dy = (finalW/2) * Math.sin(rotRad);
+                            const ex = cx + dx, ey = cy + dy;
+                            page.drawLine({
+                                start: { x: cx - dx, y: cy - dy }, end: { x: ex, y: ey },
+                                color: sColorObj || rgb(0,0,0), thickness: sWidth || 1, opacity: op
+                            });
+                            const headLen = Math.max(10, sWidth * 3);
+                            const ang = Math.atan2(dy, dx); 
+                            const p1 = { x: ex, y: ey };
+                            const p2 = { x: ex - headLen * Math.cos(ang - Math.PI/6), y: ey - headLen * Math.sin(ang - Math.PI/6) };
+                            const p3 = { x: ex - headLen * Math.cos(ang + Math.PI/6), y: ey - headLen * Math.sin(ang + Math.PI/6) };
+                            page.drawSvgPath(`M ${p1.x},${p1.y} L ${p2.x},${p2.y} L ${p3.x},${p3.y} Z`, { color: sColorObj || rgb(0,0,0), opacity: op });
+                        } else if (obj.type === 'draw' || obj.type === 'image') {
+                            const imgEmbed = await doc.embedPng(obj.img);
+                            page.drawImage(imgEmbed, { x: drawX, y: drawY, width: finalW, height: finalH, rotate: rRot, opacity: op });
+                        }
                     }
                 }
 
-                downloadBlob(new Blob([await doc.save()],{type:'application/pdf'}), `${getOutputName('addtext','text_added')}.pdf`);
+                downloadBlob(new Blob([await doc.save()],{type:'application/pdf'}), `${getOutputName('addtext','edited')}.pdf`);
                 toast(t('msg_done'));
             } catch(e) {
-                toast(e.message,'error')
+                console.error(e); toast(e.message,'error');
             } 
             hideLoading();
         }
@@ -1792,6 +2190,27 @@
                 });
             }
         }
+        
+        // Setup Keyboard Shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ignore if user is typing in a form or editing text
+            if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+            
+            // Only active if the addtext panel is showing
+            if(activeEditorObject && document.getElementById('addtext').classList.contains('active')) {
+                if(e.key === 'Delete' || e.key === 'Backspace') {
+                    e.preventDefault();
+                    activeEditorObject.remove();
+                    activeEditorObject = null;
+                    saveEditorState();
+                } else if (e.key === 'Escape') {
+                    setActiveEditorObject(null);
+                } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
+                    e.preventDefault();
+                    duplicateActiveObject();
+                }
+            }
+        });
 
         function toggleSplitMode() {
             const mode = document.getElementById('mode-split').value;
