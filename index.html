@@ -4,363 +4,529 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CNS : Workspace Portal 2026</title>
-    
     <meta name="theme-color" content="#0046be">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --primary: #0f172a; --accent: #0046be; --accent-hover: #003399;
-            --bg: #f3f6fc; --header-bg: #ffffff; --text-main: #1e293b; --text-sec: #64748b;
-            --border: #e2e8f0; --card-bg: #ffffff; --card-hover: #f8fafc;
-            --success: #10b981; --warning: #f59e0b; --purple: #8b5cf6; --pink: #ec4899;
+            --accent:    #0046be;
+            --accent-2:  #7c3aed;
+            --bg:        #eef2fa;
+            --surface:   #ffffff;
+            --surface-2: #f4f7fd;
+            --border:    #dde5f0;
+            --border-2:  #c5d3e8;
+            --text:      #0f172a;
+            --text-2:    #334155;
+            --text-3:    #64748b;
+            --sh-sm:     0 1px 4px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.05);
+            --sh-md:     0 6px 24px rgba(0,0,0,0.1);
+            --r:         15px;
         }
         [data-theme="dark"] {
-            --primary: #f8fafc; --accent: #3b82f6; --accent-hover: #60a5fa;
-            --bg: #0f172a; --header-bg: #1e293b; --text-main: #f1f5f9; --text-sec: #94a3b8;
-            --border: #334155; --card-bg: #1e293b; --card-hover: #1e293b;
-        }
-        
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { 
-            font-family: 'Sarabun', sans-serif; 
-            background: var(--bg); 
-            color: var(--text-main); 
-            margin: 0; 
-            display: flex; 
-            flex-direction: column;
-            min-height: 100vh; 
-            transition: background 0.3s, color 0.3s; 
+            --bg:        #0a1020;
+            --surface:   #14202e;
+            --surface-2: #192840;
+            --border:    #1d3050;
+            --border-2:  #243a58;
+            --text:      #f1f5f9;
+            --text-2:    #cbd5e1;
+            --text-3:    #94a3b8;
+            --sh-sm:     0 1px 4px rgba(0,0,0,0.2), 0 4px 16px rgba(0,0,0,0.25);
+            --sh-md:     0 6px 24px rgba(0,0,0,0.45);
         }
 
-        /* Navbar / Header */
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 2rem;
+        *, *::before, *::after {
+            box-sizing: border-box; margin: 0; padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        html, body { height: 100%; overflow: hidden; }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: var(--bg);
+            color: var(--text);
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            flex-direction: column;
+            transition: background 0.3s, color 0.3s;
+        }
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background:
+                radial-gradient(ellipse at 8% 10%,  rgba(0,70,190,0.08)  0%, transparent 50%),
+                radial-gradient(ellipse at 92% 90%, rgba(124,58,237,0.07) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(14,165,233,0.03) 0%, transparent 60%);
+            pointer-events: none; z-index: 0;
+        }
+
+        /* ─── HEADER ─── */
+        header {
+            flex-shrink: 0;
+            height: 60px;
+            background: rgba(255,255,255,0.88);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 1.8rem;
+            display: flex; align-items: center; justify-content: space-between;
+            position: relative; z-index: 100;
+            box-shadow: 0 1px 0 var(--border), 0 2px 12px rgba(0,0,0,0.04);
             transition: background 0.3s, border-color 0.3s;
         }
+        [data-theme="dark"] header { background: rgba(20,32,46,0.92); }
 
-        .brand-container { display: flex; align-items: center; gap: 15px; }
-        .brand-icon {
-            width: 45px; height: 45px;
-            background: linear-gradient(135deg, var(--accent), var(--purple));
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 1.5rem; font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0, 70, 190, 0.3);
+        .brand { display: flex; align-items: center; gap: 12px; user-select: none; }
+        .brand-logo { width: 96px; height: 36px; object-fit: contain; border-radius: 4px; }
+        .brand-sep  { width: 1px; height: 22px; background: var(--border-2); }
+        .brand-name { font-family: 'Prompt', sans-serif; font-size: 0.95rem; font-weight: 600; color: var(--text); line-height: 1.15; }
+        .brand-sub  { font-family: 'IBM Plex Mono', monospace; font-size: 0.63rem; color: var(--text-3); letter-spacing: 0.5px; }
+
+        .hdr-right { display: flex; align-items: center; gap: 7px; }
+
+        .ver-pill {
+            font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem;
+            color: var(--accent); background: rgba(0,70,190,0.08);
+            border: 1px solid rgba(0,70,190,0.18); padding: 2px 9px; border-radius: 20px;
         }
-        .brand-text h1 { margin: 0; font-family: 'Prompt', sans-serif; font-size: 1.8rem; color: var(--text-main); }
-        .brand-text p { margin: 0; font-size: 1rem; color: var(--text-sec); font-weight: 500; }
-
-        .top-controls { display: flex; gap: 10px; }
-        .control-btn { 
-            background: var(--bg); border: 1px solid var(--border); 
-            padding: 8px 16px; border-radius: 30px; font-size: 0.9rem; font-weight: 700; 
-            color: var(--text-main); cursor: pointer; transition: all 0.2s; 
-            display: flex; align-items: center; gap: 8px; 
+        .hbtn {
+            height: 32px; padding: 0 11px; border-radius: 8px;
+            border: 1px solid var(--border); background: var(--surface-2);
+            color: var(--text-2); cursor: pointer;
+            display: flex; align-items: center; gap: 6px;
+            font-size: 0.75rem; font-weight: 600; letter-spacing: 0.3px;
+            font-family: 'IBM Plex Mono', monospace;
+            transition: all 0.2s;
         }
-        .control-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .hbtn.sq { width: 32px; padding: 0; justify-content: center; font-size: 0.82rem; }
+        .hbtn:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,70,190,0.05); }
 
-        /* Main Content */
+        /* ─── MAIN ─── */
         main {
-            flex: 1;
-            padding: 4rem 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
+            flex: 1; overflow: hidden;
+            position: relative; z-index: 1;
+            display: flex; flex-direction: column;
+            padding: 1.4rem 1.8rem 0;
+            gap: 1rem;
         }
 
-        .welcome-section { text-align: center; margin-bottom: 4rem; animation: fadeInDown 0.6s ease; }
-        .welcome-section h2 { font-family: 'Prompt', sans-serif; font-size: 2.5rem; margin: 0 0 10px 0; color: var(--text-main); transition: color 0.3s; }
-        .welcome-section p { font-size: 1.1rem; color: var(--text-sec); margin: 0; max-width: 600px; margin: 0 auto; transition: color 0.3s; }
+        /* ─── HERO (compact) ─── */
+        .hero { flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; }
+        .hero-left {}
+        .hero h2 {
+            font-family: 'Prompt', sans-serif;
+            font-size: 1.35rem; font-weight: 700;
+            color: var(--text); letter-spacing: -0.3px; line-height: 1.2;
+        }
+        .hero h2 .hl {
+            background: linear-gradient(130deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .hero p { font-size: 0.82rem; color: var(--text-3); margin-top: 2px; }
+        .hero-stats {
+            display: flex; gap: 1.2rem; align-items: center;
+        }
+        .hstat {
+            text-align: center;
+        }
+        .hstat .sv {
+            font-family: 'Prompt', sans-serif; font-size: 1.3rem; font-weight: 700;
+            color: var(--text); line-height: 1;
+        }
+        .hstat .sl { font-size: 0.72rem; color: var(--text-3); margin-top: 1px; }
+        .hstat-div { width: 1px; height: 28px; background: var(--border-2); }
 
-        /* App Grid */
+        /* ─── GRID ─── */
         .app-grid {
+            flex: 1; min-height: 0;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 2rem;
-            animation: fadeInUp 0.6s ease 0.2s backwards;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 1rem;
         }
 
+        /* ─── CARD ─── */
         .app-card {
-            background: var(--card-bg);
+            background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 2rem;
-            text-decoration: none;
-            color: var(--text-main);
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
-            position: relative;
-            overflow: hidden;
+            border-radius: var(--r);
+            padding: 1.15rem 1.2rem;
+            text-decoration: none; color: var(--text);
+            display: flex; flex-direction: column; gap: 0;
+            transition: all 0.26s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: var(--sh-sm);
+            position: relative; overflow: hidden;
+            min-height: 0;
         }
-
         .app-card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
-            background: var(--card-color, var(--accent));
-            transform: scaleX(0); transform-origin: left; transition: transform 0.3s ease;
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: var(--cc, var(--accent));
+            transform: scaleX(0); transform-origin: left;
+            transition: transform 0.3s ease;
         }
-
-        .app-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-            border-color: var(--card-color, var(--accent));
-            background: var(--card-hover);
-        }
-
+        .app-card:hover { transform: translateY(-5px); box-shadow: var(--sh-md); border-color: color-mix(in srgb, var(--cc, var(--accent)) 35%, var(--border)); }
         .app-card:hover::before { transform: scaleX(1); }
 
-        .app-icon-wrapper {
-            width: 60px; height: 60px;
-            border-radius: 16px;
+        /* coming-soon dimmed slightly */
+        .app-card.coming { opacity: 0.82; }
+        .app-card.coming:hover { opacity: 1; transform: translateY(-3px); }
+
+        .card-top {
+            display: flex; align-items: flex-start;
+            justify-content: space-between; margin-bottom: 0.75rem;
+        }
+        .app-icon {
+            width: 44px; height: 44px; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.8rem;
-            background: var(--icon-bg, rgba(0, 70, 190, 0.1));
-            color: var(--card-color, var(--accent));
-            transition: all 0.3s ease;
+            font-size: 1.2rem;
+            background: var(--ib, rgba(0,70,190,0.08));
+            color: var(--cc, var(--accent));
+            transition: transform 0.25s;
+            flex-shrink: 0;
         }
-        
-        .app-card:hover .app-icon-wrapper {
-            transform: scale(1.1) rotate(5deg);
+        .app-card:hover .app-icon { transform: scale(1.1) rotate(5deg); }
+
+        .card-badges { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+
+        .sbadge {
+            font-family: 'IBM Plex Mono', monospace; font-size: 0.58rem; font-weight: 600;
+            padding: 2px 8px; border-radius: 20px; border: 1px solid transparent;
+            letter-spacing: 0.5px; text-transform: uppercase; line-height: 1.6;
+        }
+        .s-ready { background: rgba(16,185,129,0.08); color: #10b981; border-color: rgba(16,185,129,0.22); }
+        .s-soon  { background: rgba(245,158,11,0.08);  color: #f59e0b; border-color: rgba(245,158,11,0.22); }
+
+        .cat-pill {
+            font-family: 'IBM Plex Mono', monospace; font-size: 0.55rem;
+            padding: 2px 7px; border-radius: 20px;
+            background: var(--surface-2); color: var(--text-3);
+            border: 1px solid var(--border); letter-spacing: 0.3px;
         }
 
-        .app-info h3 { font-family: 'Prompt', sans-serif; margin: 0 0 8px 0; font-size: 1.3rem; transition: color 0.3s; }
-        .app-info p { margin: 0; font-size: 0.95rem; color: var(--text-sec); line-height: 1.5; transition: color 0.3s; }
-
-        .app-action {
-            margin-top: auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-weight: 700;
-            color: var(--card-color, var(--accent));
-            font-size: 0.95rem;
+        .card-body { flex: 1; min-height: 0; overflow: hidden; }
+        .card-body h3 {
+            font-family: 'Prompt', sans-serif; font-size: 0.95rem; font-weight: 600;
+            color: var(--text); margin-bottom: 4px; line-height: 1.3;
+        }
+        .card-body p {
+            font-size: 0.78rem; color: var(--text-3); line-height: 1.55;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
         }
 
-        .app-action i { transition: transform 0.2s; }
-        .app-card:hover .app-action i { transform: translateX(5px); }
-        
-        /* Status Badge */
-        .status-badge {
-            position: absolute; top: 1.5rem; right: 1.5rem;
-            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
-            padding: 4px 10px; border-radius: 20px;
+        .card-foot {
+            display: flex; align-items: center; justify-content: space-between;
+            padding-top: 0.6rem; margin-top: 0.65rem;
+            border-top: 1px solid var(--border); flex-shrink: 0;
         }
-        .status-ready { background: rgba(16, 185, 129, 0.1); color: var(--success); }
-        .status-coming { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .launch-txt { font-size: 0.75rem; font-weight: 700; color: var(--cc, var(--accent)); }
+        .arr {
+            width: 26px; height: 26px; border-radius: 50%;
+            border: 1.5px solid var(--cc, var(--accent));
+            color: var(--cc, var(--accent));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.6rem; transition: all 0.2s;
+        }
+        .app-card:hover .arr { background: var(--cc, var(--accent)); color: #fff; }
 
-        /* Footer */
+        /* ─── FOOTER ─── */
         footer {
-            text-align: center; padding: 2rem;
-            color: var(--text-sec); font-size: 0.85rem;
+            flex-shrink: 0; height: 38px; position: relative; z-index: 1;
             border-top: 1px solid var(--border);
-            margin-top: auto;
-            transition: color 0.3s, border-color 0.3s;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 1.8rem; transition: border-color 0.3s;
         }
+        .f-copy { font-size: 0.7rem; color: var(--text-3); }
+        .f-dev  { font-size: 0.7rem; color: var(--text-3); display: flex; align-items: center; gap: 5px; }
+        .f-dev b { font-family: 'IBM Plex Mono', monospace; font-size: 0.66rem; color: var(--accent); font-weight: 500; }
 
-        /* Animations */
-        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* ─── ANIMATIONS ─── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .hero { animation: fadeUp 0.4s ease both; }
+        .app-card { animation: fadeUp 0.4s ease both; }
+        .app-card:nth-child(1) { animation-delay: 0.06s; }
+        .app-card:nth-child(2) { animation-delay: 0.10s; }
+        .app-card:nth-child(3) { animation-delay: 0.14s; }
+        .app-card:nth-child(4) { animation-delay: 0.18s; }
+        .app-card:nth-child(5) { animation-delay: 0.22s; }
+        .app-card:nth-child(6) { animation-delay: 0.26s; }
 
-        @media (max-width: 768px) {
-            header { padding: 1rem; }
-            main { padding: 2rem 1rem; }
-            .welcome-section h2 { font-size: 1.8rem; }
+        /* ─── MOBILE ─── */
+        @media (max-width: 800px) {
+            html, body { overflow: auto; height: auto; }
+            .app-grid { grid-template-columns: 1fr 1fr; grid-template-rows: unset; }
+            .hero-stats { display: none; }
+        }
+        @media (max-width: 520px) {
             .app-grid { grid-template-columns: 1fr; }
-            .brand-text p { display: none; }
+            main { padding: 1rem; }
+            .ver-pill { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="brand-container">
-            <img src="Logo.png" alt="Logo" style="width: 120px; height: 55px; object-fit: contain; border-radius: 8px;">
-            <div class="brand-text">
-                <h1>CNS Workspace</h1>
-                <p>Enterprise Management Suite</p>
+<header>
+    <div class="brand">
+        <img src="Logo.png" alt="CNS Logo" class="brand-logo">
+        <div class="brand-sep"></div>
+        <div>
+            <div class="brand-name">CNS Workspace</div>
+            <div class="brand-sub">ENTERPRISE SUITE 2026</div>
+        </div>
+    </div>
+    <div class="hdr-right">
+        <span class="ver-pill">v2.1.0</span>
+        <button class="hbtn" onclick="toggleLanguage()">
+            <i class="fas fa-globe" style="font-size:0.72rem;"></i>
+            <span id="lang-label">TH</span>
+        </button>
+        <button class="hbtn sq" onclick="toggleTheme()">
+            <i class="fas fa-moon" id="theme-icon"></i>
+        </button>
+    </div>
+</header>
+
+<main>
+
+    <!-- Hero -->
+    <div class="hero">
+        <div class="hero-left">
+            <h2>
+                <span data-i18n="t1">ยินดีต้อนรับสู่</span>
+                <span class="hl"> CNS Workspace</span>
+            </h2>
+            <p data-i18n="sub">เลือกโปรแกรมที่ต้องการใช้งาน</p>
+        </div>
+        <div class="hero-stats">
+            <div class="hstat">
+                <div class="sv" id="stat-ready">3</div>
+                <div class="sl" data-i18n="s_ready">พร้อมใช้งาน</div>
+            </div>
+            <div class="hstat-div"></div>
+            <div class="hstat">
+                <div class="sv">6</div>
+                <div class="sl" data-i18n="s_total">โปรแกรมทั้งหมด</div>
             </div>
         </div>
-        <div class="top-controls">
-            <button class="control-btn" onclick="toggleTheme()" title="Toggle Dark Mode">
-                <i class="fas fa-moon" id="theme-icon"></i>
-            </button>
-            <button class="control-btn" onclick="toggleLanguage()">
-                <i class="fas fa-globe"></i> <span id="lang-label">TH</span>
-            </button>
-        </div>
-    </header>
+    </div>
 
-    <main>
-        <div class="welcome-section">
-            <h2 data-i18n="welcome_title">ยินดีต้อนรับสู่ CNS Workspace</h2>
-            <p data-i18n="welcome_subtitle">กรุณาเลือกโปรแกรมหรือเครื่องมือที่คุณต้องการใช้งานจากรายการด้านล่าง</p>
-        </div>
+    <!-- App Grid 3×2 -->
+    <div class="app-grid">
 
-        <div class="app-grid">
-            
-            <!-- App 1: PDF Tools -->
-            <a href="pdf-tools.html" class="app-card" style="--card-color: #ef4444; --icon-bg: rgba(239, 68, 68, 0.1);">
-                <div class="status-badge status-ready" data-i18n="badge_ready">พร้อมใช้งาน</div>
-                <div class="app-icon-wrapper">
-                    <i class="fas fa-file-pdf"></i>
+        <!-- 1. PDF Tools Pro -->
+        <a href="pdf-tools.html" class="app-card"
+           style="--cc:#ef4444; --ib:rgba(239,68,68,0.09);">
+            <div class="card-top">
+                <div class="app-icon"><i class="fas fa-file-pdf"></i></div>
+                <div class="card-badges">
+                    <span class="sbadge s-ready" data-i18n="ready">พร้อมใช้งาน</span>
+                    <span class="cat-pill">PDF</span>
                 </div>
-                <div class="app-info">
-                    <h3 data-i18n="app1_title">PDF Tools Pro</h3>
-                    <p data-i18n="app1_desc">จัดการไฟล์ PDF ครบวงจร แปลงไฟล์, แยก, รวม, ลบหน้า, ประทับลายน้ำ และเพิ่มข้อความหรือเซ็นเอกสารดิจิทัลอิสระ</p>
+            </div>
+            <div class="card-body">
+                <h3 data-i18n="a1t">PDF Tools Pro</h3>
+                <p data-i18n="a1d">จัดการไฟล์ PDF ครบวงจร แปลงไฟล์, แยก, รวม, ลบหน้า, ลายน้ำ และเซ็นเอกสารดิจิทัล</p>
+            </div>
+            <div class="card-foot">
+                <span class="launch-txt" data-i18n="open">เปิดใช้งาน</span>
+                <div class="arr"><i class="fas fa-arrow-right"></i></div>
+            </div>
+        </a>
+
+        <!-- 2. PDF Editor -->
+        <a href="pdf-editor.html" class="app-card"
+           style="--cc:#f97316; --ib:rgba(249,115,22,0.09);">
+            <div class="card-top">
+                <div class="app-icon"><i class="fas fa-pen-to-square"></i></div>
+                <div class="card-badges">
+                    <span class="sbadge s-ready" data-i18n="ready">พร้อมใช้งาน</span>
+                    <span class="cat-pill">PDF</span>
                 </div>
-                <div class="app-action">
-                    <span data-i18n="btn_launch">เปิดใช้งาน</span>
-                    <i class="fas fa-arrow-right"></i>
+            </div>
+            <div class="card-body">
+                <h3 data-i18n="a2t">ตัวแก้ไขไฟล์ PDF</h3>
+                <p data-i18n="a2d">แก้ไขเนื้อหา PDF โดยตรง เพิ่ม, แก้ไขข้อความ, ภาพ และจัดรูปแบบหน้าแบบมืออาชีพ</p>
+            </div>
+            <div class="card-foot">
+                <span class="launch-txt" data-i18n="open">เปิดใช้งาน</span>
+                <div class="arr"><i class="fas fa-arrow-right"></i></div>
+            </div>
+        </a>
+
+        <!-- 3. QR & Barcode -->
+        <a href="qr-barcode.html" class="app-card"
+           style="--cc:#7c3aed; --ib:rgba(124,58,237,0.09);">
+            <div class="card-top">
+                <div class="app-icon"><i class="fas fa-qrcode"></i></div>
+                <div class="card-badges">
+                    <span class="sbadge s-ready" data-i18n="ready">พร้อมใช้งาน</span>
+                    <span class="cat-pill">UTILITY</span>
                 </div>
-            </a>
+            </div>
+            <div class="card-body">
+                <h3 data-i18n="a3t">QR & Barcode Generator</h3>
+                <p data-i18n="a3d">สร้างคิวอาร์โค้ดและบาร์โค้ดสำหรับงานธุรกิจ ปรับแต่งสี ใส่โลโก้ และดาวน์โหลดได้ทันที</p>
+            </div>
+            <div class="card-foot">
+                <span class="launch-txt" data-i18n="open">เปิดใช้งาน</span>
+                <div class="arr"><i class="fas fa-arrow-right"></i></div>
+            </div>
+        </a>
 
-            <!-- App 2: QR & Barcode Generator -->
-            <a href="qr-barcode.html" class="app-card" style="--card-color: #8b5cf6; --icon-bg: rgba(139, 92, 246, 0.1);">
-                <div class="status-badge status-ready" data-i18n="badge_ready">พร้อมใช้งาน</div>
-                <div class="app-icon-wrapper">
-                    <i class="fas fa-qrcode"></i>
+        <!-- 4. Image Studio -->
+        <a href="#" class="app-card coming"
+           style="--cc:#0ea5e9; --ib:rgba(14,165,233,0.09);">
+            <div class="card-top">
+                <div class="app-icon"><i class="fas fa-image"></i></div>
+                <div class="card-badges">
+                    <span class="sbadge s-soon" data-i18n="soon">เร็วๆ นี้</span>
+                    <span class="cat-pill">IMAGE</span>
                 </div>
-                <div class="app-info">
-                    <h3 data-i18n="app2_title">QR & Barcode Generator</h3>
-                    <p data-i18n="app2_desc">ระบบสร้างคิวอาร์โค้ดและบาร์โค้ดสำหรับงานธุรกิจ ปรับแต่งสีและใส่โลโก้ได้</p>
+            </div>
+            <div class="card-body">
+                <h3 data-i18n="a4t">Image Studio</h3>
+                <p data-i18n="a4d">เครื่องมือจัดการรูปภาพ ปรับขนาด, ครอป, ลดขนาดไฟล์ และแปลงนามสกุลแบบรวดเร็ว</p>
+            </div>
+            <div class="card-foot">
+                <span class="launch-txt" data-i18n="open">เปิดใช้งาน</span>
+                <div class="arr"><i class="fas fa-arrow-right"></i></div>
+            </div>
+        </a>
+
+        <!-- 5. Report Builder -->
+        <a href="#" class="app-card coming"
+           style="--cc:#10b981; --ib:rgba(16,185,129,0.09);">
+            <div class="card-top">
+                <div class="app-icon"><i class="fas fa-chart-column"></i></div>
+                <div class="card-badges">
+                    <span class="sbadge s-soon" data-i18n="soon">เร็วๆ นี้</span>
+                    <span class="cat-pill">REPORT</span>
                 </div>
-                <div class="app-action">
-                    <span data-i18n="btn_launch">เปิดใช้งาน</span>
-                    <i class="fas fa-arrow-right"></i>
+            </div>
+            <div class="card-body">
+                <h3 data-i18n="a5t">Report Builder</h3>
+                <p data-i18n="a5d">สร้างรายงานและแดชบอร์ดองค์กร พร้อมส่งออกเป็น PDF, Excel และแชร์ผ่านลิงก์</p>
+            </div>
+            <div class="card-foot">
+                <span class="launch-txt" data-i18n="open">เปิดใช้งาน</span>
+                <div class="arr"><i class="fas fa-arrow-right"></i></div>
+            </div>
+        </a>
+
+        <!-- 6. Document OCR -->
+        <a href="#" class="app-card coming"
+           style="--cc:#ec4899; --ib:rgba(236,72,153,0.09);">
+            <div class="card-top">
+                <div class="app-icon"><i class="fas fa-file-lines"></i></div>
+                <div class="card-badges">
+                    <span class="sbadge s-soon" data-i18n="soon">เร็วๆ นี้</span>
+                    <span class="cat-pill">OCR</span>
                 </div>
-            </a>
+            </div>
+            <div class="card-body">
+                <h3 data-i18n="a6t">Document Scanner & OCR</h3>
+                <p data-i18n="a6d">แปลงภาพสแกนเป็นข้อความที่แก้ไขได้ รองรับภาษาไทย–อังกฤษ พร้อมส่งออกหลายรูปแบบ</p>
+            </div>
+            <div class="card-foot">
+                <span class="launch-txt" data-i18n="open">เปิดใช้งาน</span>
+                <div class="arr"><i class="fas fa-arrow-right"></i></div>
+            </div>
+        </a>
 
-            <!-- App 3: Image Studio (Placeholder) -->
-            <a href="#" class="app-card" style="--card-color: #3b82f6; --icon-bg: rgba(59, 130, 246, 0.1);">
-                <div class="status-badge status-coming" data-i18n="badge_soon">เร็วๆ นี้</div>
-                <div class="app-icon-wrapper">
-                    <i class="fas fa-image"></i>
-                </div>
-                <div class="app-info">
-                    <h3 data-i18n="app3_title">Image Studio</h3>
-                    <p data-i18n="app3_desc">เครื่องมือจัดการรูปภาพ ปรับแต่งขนาด, ครอป, ลดขนาดไฟล์ และแปลงนามสกุลรูปภาพ</p>
-                </div>
-                <div class="app-action">
-                    <span data-i18n="btn_launch">เปิดใช้งาน</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
+    </div>
+</main>
 
-        </div>
-    </main>
+<footer>
+    <div class="f-copy">&copy; 2026 CNS Computer Co., Ltd. All rights reserved.</div>
+    <div class="f-dev">
+        <i class="fas fa-code" style="font-size:0.65rem; color:var(--accent);"></i>
+        Developed by <b>MaRcH WoRaWiT</b>
+    </div>
+</footer>
 
-    <footer>
-        &copy; 2026 CNS Computer Co., Ltd. All rights reserved.<br>
-        <span style="color: var(--accent); font-weight: 600;">Developed by MaRcH WoRaWiT</span>
-    </footer>
+<script>
+const i18n = {
+    th: {
+        t1:"ยินดีต้อนรับสู่", sub:"เลือกโปรแกรมที่ต้องการใช้งาน",
+        s_ready:"พร้อมใช้งาน", s_total:"โปรแกรมทั้งหมด",
+        ready:"พร้อมใช้งาน", soon:"เร็วๆ นี้", open:"เปิดใช้งาน",
+        a1t:"PDF Tools Pro",
+        a1d:"จัดการไฟล์ PDF ครบวงจร แปลงไฟล์, แยก, รวม, ลบหน้า, ลายน้ำ และเซ็นเอกสารดิจิทัล",
+        a2t:"ตัวแก้ไขไฟล์ PDF",
+        a2d:"แก้ไขเนื้อหา PDF โดยตรง เพิ่ม, แก้ไขข้อความ, ภาพ และจัดรูปแบบหน้าแบบมืออาชีพ",
+        a3t:"QR & Barcode Generator",
+        a3d:"สร้างคิวอาร์โค้ดและบาร์โค้ดสำหรับงานธุรกิจ ปรับแต่งสี ใส่โลโก้ และดาวน์โหลดได้ทันที",
+        a4t:"Image Studio",
+        a4d:"เครื่องมือจัดการรูปภาพ ปรับขนาด, ครอป, ลดขนาดไฟล์ และแปลงนามสกุลแบบรวดเร็ว",
+        a5t:"Report Builder",
+        a5d:"สร้างรายงานและแดชบอร์ดองค์กร พร้อมส่งออกเป็น PDF, Excel และแชร์ผ่านลิงก์",
+        a6t:"Document Scanner & OCR",
+        a6d:"แปลงภาพสแกนเป็นข้อความที่แก้ไขได้ รองรับภาษาไทย–อังกฤษ พร้อมส่งออกหลายรูปแบบ",
+    },
+    en: {
+        t1:"Welcome to", sub:"Select a program to get started",
+        s_ready:"Available", s_total:"Total Programs",
+        ready:"Available", soon:"Coming Soon", open:"Launch",
+        a1t:"PDF Tools Pro",
+        a1d:"All-in-one PDF management. Convert, split, merge, delete pages, watermark and digital signature.",
+        a2t:"PDF Editor",
+        a2d:"Edit PDF content directly. Add, modify text, images and format pages professionally.",
+        a3t:"QR & Barcode Generator",
+        a3d:"Create QR codes and barcodes for business. Customize colors, add logos and download instantly.",
+        a4t:"Image Studio",
+        a4d:"Image management tools. Resize, crop, compress and convert image formats quickly.",
+        a5t:"Report Builder",
+        a5d:"Create organizational reports and dashboards. Export to PDF, Excel and share via link.",
+        a6t:"Document Scanner & OCR",
+        a6d:"Convert scanned images to editable text. Supports Thai–English with multiple export formats.",
+    }
+};
 
-    <script>
-        // --- Language i18n Dictionary ---
-        const i18n = {
-            th: {
-                welcome_title: "ยินดีต้อนรับสู่ CNS Workspace",
-                welcome_subtitle: "กรุณาเลือกโปรแกรมหรือเครื่องมือที่คุณต้องการใช้งานจากรายการด้านล่าง",
-                badge_ready: "พร้อมใช้งาน",
-                badge_soon: "เร็วๆ นี้",
-                btn_launch: "เปิดใช้งานโปรแกรม",
-                
-                app1_title: "PDF Tools Pro",
-                app1_desc: "จัดการไฟล์ PDF ครบวงจร แปลงไฟล์, แยก, รวม, ลบหน้า, ประทับลายน้ำ และเพิ่มข้อความหรือเซ็นเอกสารดิจิทัลอิสระ",
+let lang = 'th';
 
-                app2_title: "QR & Barcode Generator",
-                app2_desc: "ระบบสร้างคิวอาร์โค้ดและบาร์โค้ดสำหรับงานธุรกิจ ปรับแต่งสี ใส่โลโก้ และสร้างจำนวนมากๆ ได้รวดเร็ว",
-                
-                app3_title: "Image Studio (เร็วๆ นี้)",
-                app3_desc: "เครื่องมือจัดการรูปภาพ ปรับขนาด, ครอป, ลดขนาดไฟล์รูปภาพ และแปลงนามสกุลรูปภาพแบบรวดเร็ว"
-            },
-            en: {
-                welcome_title: "Welcome to CNS Workspace",
-                welcome_subtitle: "Please select an application or tool you would like to use from the suite below.",
-                badge_ready: "Available",
-                badge_soon: "Coming Soon",
-                btn_launch: "Launch App",
-                
-                app1_title: "PDF Tools Pro",
-                app1_desc: "All-in-one PDF management. Convert, split, merge, delete pages, watermark, add text and digital signature.",
-
-                app2_title: "QR & Barcode Generator",
-                app2_desc: "Generate QR codes and barcodes for business. Customize colors, add logos, and bulk generate.",
-                
-                app3_title: "Image Studio",
-                app3_desc: "Image management tools. Resize, crop, compress, and convert image formats quickly."
-            }
-        };
-
-        // --- Current State Variables ---
-        let curLang = 'th';
-        
-        // --- Initialization ---
-        function init() {
-            // Restore Language
-            try { 
-                const s = localStorage.getItem('cns_lang'); 
-                if(s && ['th','en'].includes(s)) curLang = s; 
-            } catch(e) {}
-            applyLanguage();
-
-            // Restore Theme
-            try {
-                if(localStorage.getItem('cns_theme') === 'dark') {
-                    document.body.setAttribute('data-theme', 'dark');
-                    document.getElementById('theme-icon').className = 'fas fa-sun';
-                }
-            } catch(e) {}
+function applyLang() {
+    document.getElementById('lang-label').textContent = lang.toUpperCase();
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const k = el.getAttribute('data-i18n');
+        if (i18n[lang][k]) el.textContent = i18n[lang][k];
+    });
+}
+function toggleLanguage() {
+    lang = lang === 'th' ? 'en' : 'th';
+    try { localStorage.setItem('cns_lang', lang); } catch(e) {}
+    applyLang();
+}
+function toggleTheme() {
+    const dark = document.body.getAttribute('data-theme') === 'dark';
+    document.body.setAttribute('data-theme', dark ? 'light' : 'dark');
+    document.getElementById('theme-icon').className = dark ? 'fas fa-moon' : 'fas fa-sun';
+    try { localStorage.setItem('cns_theme', dark ? 'light' : 'dark'); } catch(e) {}
+}
+function init() {
+    try { const l = localStorage.getItem('cns_lang'); if (l && ['th','en'].includes(l)) lang = l; } catch(e) {}
+    applyLang();
+    try {
+        if (localStorage.getItem('cns_theme') === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+            document.getElementById('theme-icon').className = 'fas fa-sun';
         }
-
-        // --- Core Functions ---
-        function applyLanguage() {
-            const btn = document.getElementById('lang-label'); 
-            if(btn) btn.textContent = curLang.toUpperCase();
-            
-            document.querySelectorAll('[data-i18n]').forEach(el => { 
-                const k = el.getAttribute('data-i18n'); 
-                if(i18n[curLang][k]) el.textContent = i18n[curLang][k]; 
-            });
-        }
-
-        function toggleLanguage() { 
-            curLang = curLang === 'th' ? 'en' : 'th'; 
-            try { localStorage.setItem('cns_lang', curLang); } catch(e) {} 
-            applyLanguage(); 
-        }
-
-        function toggleTheme() { 
-            const d = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; 
-            document.body.setAttribute('data-theme', d); 
-            document.getElementById('theme-icon').className = d === 'dark' ? 'fas fa-sun' : 'fas fa-moon'; 
-            try { localStorage.setItem('cns_theme', d); } catch(e) {} 
-        }
-
-        // Prevent default on "Coming Soon" links
-        document.querySelectorAll('a[href="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                alert(curLang === 'th' ? 'โปรแกรมนี้กำลังอยู่ระหว่างการพัฒนา กรุณารอติดตามในเวอร์ชันหน้าครับ' : 'This application is currently under development. Stay tuned for the next update!');
-            });
-        });
-
-        // Run Init
-        window.onload = init;
-    </script>
+    } catch(e) {}
+}
+document.querySelectorAll('a[href="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+        e.preventDefault();
+        alert(lang === 'th'
+            ? 'โปรแกรมนี้กำลังอยู่ระหว่างการพัฒนา กรุณารอติดตามในเวอร์ชันหน้าครับ'
+            : 'This app is currently under development. Stay tuned!');
+    });
+});
+window.onload = init;
+</script>
 </body>
 </html>
