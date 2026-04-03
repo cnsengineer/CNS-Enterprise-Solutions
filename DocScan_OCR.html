@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CNS : Document Scanner & OCR</title>
+<meta name="theme-color" content="#0046be">
+
+<script>
+  if(localStorage.getItem('cns_ocr_theme')==='dark'){
+    document.documentElement.setAttribute('data-theme','dark');
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+/* ── CNS DESIGN SYSTEM ── */
+:root {
+  --accent:#0046be; --accent-h:#003399; --accent-glow:rgba(0,70,190,.18);
+  --bg:#f3f6fc; --bg2:#ffffff; --bg3:#f8fafc; --bg4:#e2e8f0; --bg5:#cbd5e1;
+  --border:#e2e8f0; --border2:#cbd5e1;
+  --text:#1e293b; --text2:#64748b; --text3:#94a3b8;
+  --success:#10b981; --danger:#ef4444; --warn:#f59e0b;
+  --workspace:#dde3ef;
+  --brand-h:52px; --status-h:28px;
+  --radius:10px;
+}
+[data-theme="dark"] {
+  --accent:#3b82f6; --accent-h:#60a5fa; --accent-glow:rgba(59,130,246,.25);
+  --bg:#0f172a; --bg2:#1e293b; --bg3:#1e293b; --bg4:#334155; --bg5:#475569;
+  --border:#334155; --border2:#475569;
+  --text:#f1f5f9; --text2:#94a3b8; --text3:#64748b;
+  --workspace:#0b1120;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);
+  height:100vh;overflow:hidden;transition:background .3s,color .3s;
+}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--border2)}
+
+/* ── BRAND HEADER (CNS style) ── */
+#brandbar{
+  height:var(--brand-h);background:var(--bg2);
+  border-bottom:2px solid var(--border);
+  display:flex;align-items:center;padding:0 16px 0 14px;
+  box-shadow:0 2px 12px rgba(0,0,0,.05);position:relative;z-index:300;flex-shrink:0;
+}
+#brand-left{
+  display:flex;align-items:center;gap:11px;cursor:pointer;flex:1;min-width:0;
+}
+.brand-logo{
+  height:34px;width:auto;object-fit:contain;flex-shrink:0;transition:transform .25s;
+}
+.brand-logo:hover{transform:scale(1.06)}
+.brand-logo-fallback{
+  display:none;width:36px;height:36px;border-radius:8px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-h));
+  color:#fff;font-weight:800;font-size:13px;
+  align-items:center;justify-content:center;flex-shrink:0;
+}
+.brand-title{font-size:1.05rem;font-weight:800;color:var(--accent);line-height:1.1;white-space:nowrap}
+.brand-sub{font-size:.72rem;color:var(--text3);font-weight:500;margin-top:1px}
+#brand-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.ctrl-btn{
+  background:var(--bg3);border:1.5px solid var(--border);
+  padding:6px 15px;border-radius:30px;font-size:.82rem;font-weight:700;
+  font-family:'Sarabun',sans-serif;color:var(--text2);cursor:pointer;
+  display:flex;align-items:center;gap:7px;
+  transition:all .18s;box-shadow:0 2px 8px rgba(0,0,0,.04);white-space:nowrap;
+}
+.ctrl-btn:hover{
+  border-color:var(--accent);color:var(--accent);
+  transform:translateY(-1px);box-shadow:0 4px 14px var(--accent-glow);
+}
+.ctrl-btn i{font-size:.88rem}
+.ctrl-btn:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+
+/* ── MAIN LAYOUT ── */
+main{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  height:calc(100vh - var(--brand-h) - var(--status-h));
+}
+
+/* ── PANEL SHARED ── */
+.panel-left{
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.panel-right{
+  display:flex;flex-direction:column;overflow:hidden;background:var(--bg);
+}
+.panel-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 18px;
+  border-bottom:1px solid var(--border);
+  background:var(--bg2);
+  flex-shrink:0;
+}
+.panel-label{
+  font-size:10px;font-weight:800;text-transform:uppercase;
+  letter-spacing:1.2px;color:var(--text3);
+  display:flex;align-items:center;gap:7px;
+}
+.panel-label::before{
+  content:'';width:6px;height:6px;border-radius:50%;
+  background:var(--accent);display:block;flex-shrink:0;
+}
+.panel-label.green::before{background:var(--success)}
+.panel-actions{display:flex;gap:6px}
+
+/* ── SMALL BUTTONS ── */
+.btn-sm{
+  padding:5px 12px;border-radius:6px;
+  border:1.5px solid var(--border);background:var(--bg3);
+  color:var(--text2);font-family:'Sarabun',sans-serif;
+  font-size:12px;font-weight:600;cursor:pointer;
+  display:flex;align-items:center;gap:5px;transition:all .15s;
+}
+.btn-sm:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,70,190,.05)}
+.btn-sm.active{border-color:var(--accent);color:var(--accent);background:rgba(0,70,190,.08)}
+.btn-sm:disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
+.btn-sm.danger:hover{border-color:var(--danger);color:var(--danger);background:rgba(239,68,68,.05)}
+.btn-sm.success{border-color:var(--success);color:var(--success);background:rgba(16,185,129,.07)}
+.btn-sm.success:hover{background:rgba(16,185,129,.14)}
+
+/* ── DROP ZONE ── */
+.drop-zone-wrap{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  padding:24px;overflow:hidden;background:var(--workspace);
+}
+.drop-zone{
+  width:100%;height:100%;
+  border:2px dashed var(--border2);border-radius:14px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;cursor:pointer;transition:all .2s;position:relative;
+  background:var(--bg3);
+}
+.drop-zone:hover,.drop-zone.dragover{
+  border-color:var(--accent);background:rgba(0,70,190,.03);
+  box-shadow:inset 0 0 40px rgba(0,70,190,.04),0 0 0 4px rgba(0,70,190,.05);
+}
+.drop-icon{
+  width:60px;height:60px;background:var(--bg2);
+  border:1.5px solid var(--border);border-radius:14px;
+  display:grid;place-items:center;font-size:26px;
+  transition:transform .2s;box-shadow:0 2px 10px rgba(0,0,0,.06);
+}
+.drop-zone:hover .drop-icon{transform:translateY(-4px) scale(1.05)}
+.drop-title{font-size:17px;font-weight:800;color:var(--accent)}
+.drop-sub{font-size:13px;color:var(--text2);text-align:center;line-height:1.7;font-weight:500}
+.drop-sub strong{color:var(--accent)}
+.btn-upload{
+  padding:10px 26px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-h));
+  color:#fff;border:none;border-radius:30px;
+  font-family:'Sarabun',sans-serif;font-size:13.5px;font-weight:700;
+  cursor:pointer;transition:all .18s;
+  display:flex;align-items:center;gap:8px;
+  box-shadow:0 6px 20px var(--accent-glow);
+}
+.btn-upload:hover{transform:translateY(-2px);box-shadow:0 10px 28px var(--accent-glow)}
+
+/* ── IMAGE PREVIEW ── */
+.img-preview-wrap{
+  flex:1;padding:14px;overflow:hidden;
+  display:flex;flex-direction:column;gap:10px;
+  background:var(--workspace);
+}
+.img-container{
+  flex:1;border-radius:var(--radius);overflow:hidden;background:#000;
+  display:flex;align-items:center;justify-content:center;position:relative;
+  border:1px solid var(--border2);min-height:0;
+  box-shadow:0 4px 20px rgba(0,0,0,.15);
+}
+.img-container img{
+  max-width:100%;max-height:100%;object-fit:contain;
+  transition:filter .3s,transform .3s;display:block;
+}
+/* Scan line */
+.scan-line{
+  position:absolute;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  box-shadow:0 0 10px var(--accent);
+  display:none;animation:scanDown 1.4s ease-in-out infinite;
+}
+.scan-line.show{display:block}
+@keyframes scanDown{0%{top:0}100%{top:100%}}
+.img-tools{display:flex;gap:5px;flex-wrap:wrap}
+
+/* ── SCAN CONTROLS ── */
+.scan-controls{
+  padding:12px 16px;border-top:1px solid var(--border);
+  background:var(--bg2);flex-shrink:0;
+  display:flex;flex-direction:column;gap:10px;
+}
+.lang-row{display:flex;align-items:center;gap:8px}
+.lang-lbl{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
+.lang-chips{display:flex;gap:5px}
+.lchip{
+  padding:4px 13px;border-radius:20px;
+  border:1.5px solid var(--border);background:var(--bg3);
+  color:var(--text2);font-family:'Sarabun',sans-serif;
+  font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;
+}
+.lchip:hover{border-color:var(--accent);color:var(--accent)}
+.lchip.sel{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+.btn-scan-main{
+  width:100%;padding:12px;border:none;border-radius:8px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-h));
+  color:#fff;font-family:'Sarabun',sans-serif;font-size:14px;font-weight:800;
+  cursor:pointer;transition:all .18s;
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  box-shadow:0 4px 14px var(--accent-glow);
+}
+.btn-scan-main:hover{transform:translateY(-1px);box-shadow:0 8px 22px var(--accent-glow)}
+.btn-scan-main:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+/* ── PROGRESS ── */
+.progress-wrap{padding:0 16px 10px;display:none;background:var(--bg2)}
+.progress-wrap.show{display:block}
+.progress-row{display:flex;justify-content:space-between;margin-bottom:6px}
+.progress-lbl{font-size:11px;color:var(--text2);font-weight:600}
+.progress-pct{font-size:11px;color:var(--accent);font-weight:700}
+.progress-bg{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-h));
+  border-radius:2px;width:0%;transition:width .3s}
+
+/* ── TEXT EDITOR ── */
+.editor-wrap{
+  flex:1;padding:18px 20px;overflow-y:auto;display:none;min-height:0;
+}
+.editor-wrap.show{display:block}
+#output-ta{
+  width:100%;height:100%;min-height:200px;
+  background:transparent;border:none;outline:none;
+  color:var(--text);font-family:'Sarabun',sans-serif;
+  font-size:14px;line-height:1.9;resize:none;
+}
+.empty-state{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:10px;color:var(--text3);text-align:center;padding:20px;
+}
+.empty-ico{font-size:44px;opacity:.18;animation:flt 3s ease-in-out infinite}
+@keyframes flt{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.empty-txt{font-size:13px;line-height:1.8;font-weight:500}
+
+/* ── FORMAT ROW ── */
+.fmt-row{
+  display:flex;gap:5px;align-items:center;flex-wrap:wrap;
+  padding:8px 14px;border-bottom:1px solid var(--border);
+  background:var(--bg2);flex-shrink:0;
+}
+.fsep{width:1px;height:18px;background:var(--border2);margin:0 2px;flex-shrink:0}
+.fsel{
+  background:var(--bg3);border:1.5px solid var(--border);border-radius:6px;
+  color:var(--text);padding:2px 5px;font-size:12px;height:26px;outline:none;
+  cursor:pointer;font-family:'Sarabun',sans-serif;
+}
+.fsel:focus{border-color:var(--accent)}
+.fsel option{background:var(--bg2)}
+
+/* ── STATS BAR ── */
+.stats-bar{
+  display:flex;gap:14px;align-items:center;
+  padding:8px 18px;border-top:1px solid var(--border);
+  background:var(--bg2);flex-shrink:0;
+}
+.stat-item{display:flex;align-items:center;gap:5px}
+.stat-lbl{font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.8px}
+.stat-val{font-size:12px;font-weight:700;color:var(--text2)}
+.stat-sep{width:1px;height:12px;background:var(--border2)}
+.conf-wrap{display:flex;align-items:center;gap:7px;margin-left:auto}
+.conf-bar-bg{width:72px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.conf-bar-fill{height:100%;border-radius:2px;background:var(--success);width:0%;transition:width 1s}
+.conf-lbl{font-size:11px;color:var(--text3);font-weight:600}
+
+/* ── EXPORT BAR ── */
+.export-bar{
+  display:flex;gap:6px;align-items:center;flex-wrap:wrap;
+  padding:10px 14px;border-top:1px solid var(--border);
+  background:var(--bg2);flex-shrink:0;
+}
+.export-lbl{font-size:10px;color:var(--text3);font-weight:700;
+  text-transform:uppercase;letter-spacing:.8px;margin-right:2px}
+
+/* ── STATUS BAR ── */
+#statusbar{
+  height:var(--status-h);background:var(--accent);color:#fff;
+  display:flex;align-items:center;padding:0 16px;gap:10px;
+  font-family:'Sarabun',sans-serif;font-size:11.5px;font-weight:600;flex-shrink:0;
+}
+.stsp{width:1px;height:14px;background:rgba(255,255,255,.3)}
+.stml{margin-left:auto;display:flex;align-items:center;gap:10px}
+
+/* dropzone overlay */
+#dropzone-hl{
+  position:fixed;inset:0;border:3px dashed var(--accent);
+  background:rgba(0,70,190,.04);display:none;align-items:center;
+  justify-content:center;font-size:17px;font-weight:700;color:var(--accent);
+  z-index:60;pointer-events:none;
+}
+#dropzone-hl.show{display:flex}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;bottom:46px;left:50%;transform:translateX(-50%) translateY(14px);
+  background:var(--bg2);border:1.5px solid var(--border2);color:var(--text);
+  padding:8px 18px;border-radius:8px;font-size:12.5px;font-weight:600;
+  opacity:0;pointer-events:none;z-index:600;
+  transition:opacity .22s,transform .22s;
+  box-shadow:0 4px 20px rgba(0,0,0,.12);
+  display:flex;align-items:center;gap:8px;white-space:nowrap;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.ok{border-color:var(--success);color:var(--success)}
+#toast.err{border-color:var(--danger);color:var(--danger)}
+
+input[type=file]{display:none}
+
+@media(max-width:768px){
+  main{grid-template-columns:1fr;grid-template-rows:50vh auto;height:auto}
+  .panel-left{border-right:none;border-bottom:1px solid var(--border)}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ BRAND HEADER (CNS style) ═══ -->
+<div id="brandbar">
+  <div id="brand-left" onclick="window.location.href='index.html'" title="กลับหน้าหลัก">
+    <img src="Logo.png" alt="CNS Logo" class="brand-logo"
+      onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+    <div class="brand-logo-fallback">CNS</div>
+    <div>
+      <div class="brand-title">CNS : Document Scanner &amp; OCR</div>
+      <div class="brand-sub">CNS Computer Co., Ltd.</div>
+    </div>
+  </div>
+  <div id="brand-right">
+    <button class="ctrl-btn" onclick="window.location.href='index.html'">
+      <i class="fas fa-home"></i> Home
+    </button>
+    <button class="ctrl-btn" onclick="toggleTheme()">
+      <i class="fas fa-moon" id="theme-icon"></i>
+    </button>
+  </div>
+</div>
+
+<input type="file" id="file-inp" accept="image/*">
+<div id="dropzone-hl">📥 ปล่อยเพื่อเปิดภาพ</div>
+
+<main>
+  <!-- ══ LEFT: IMAGE ══ -->
+  <div class="panel-left">
+    <div class="panel-header">
+      <div class="panel-label">ภาพต้นฉบับ</div>
+      <div class="panel-actions">
+        <button class="btn-sm" id="btn-rotl" onclick="rotImg(-90)" disabled><i class="fas fa-undo"></i> ซ้าย</button>
+        <button class="btn-sm" id="btn-rotr" onclick="rotImg(90)" disabled><i class="fas fa-redo"></i> ขวา</button>
+        <button class="btn-sm" id="btn-flip" onclick="flipImg()" disabled><i class="fas fa-arrows-alt-h"></i></button>
+        <button class="btn-sm" id="btn-enh" onclick="toggleEnhance()" disabled><i class="fas fa-magic"></i></button>
+        <button class="btn-sm" id="btn-bw" onclick="toggleBW()" disabled><i class="fas fa-adjust"></i></button>
+        <button class="btn-sm danger" id="btn-clrimg" onclick="clearAll()" style="display:none"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+
+    <!-- Drop Zone -->
+    <div class="drop-zone-wrap" id="drop-wrap">
+      <div class="drop-zone" id="drop-zone">
+        <div class="drop-icon">📄</div>
+        <div class="drop-title">วางไฟล์ที่นี่</div>
+        <div class="drop-sub">รองรับ <strong>JPG · PNG · WEBP · BMP · TIFF</strong><br>ขนาดสูงสุด 20MB</div>
+        <button class="btn-upload" onclick="document.getElementById('file-inp').click()">
+          <i class="fas fa-folder-open"></i> เลือกไฟล์
+        </button>
+      </div>
+    </div>
+
+    <!-- Image Preview -->
+    <div class="img-preview-wrap" id="img-preview-wrap" style="display:none">
+      <div class="img-container">
+        <img id="preview-img" src="" alt="">
+        <div class="scan-line" id="scan-line"></div>
+      </div>
+    </div>
+
+    <!-- Scan Controls -->
+    <div class="scan-controls">
+      <div class="lang-row">
+        <span class="lang-lbl">ภาษา</span>
+        <div class="lang-chips">
+          <button class="lchip sel" data-lang="tha+eng" onclick="selectLang(this)">ไทย + EN</button>
+          <button class="lchip" data-lang="tha" onclick="selectLang(this)">ไทย</button>
+          <button class="lchip" data-lang="eng" onclick="selectLang(this)">English</button>
+        </div>
+      </div>
+      <button class="btn-scan-main" id="btn-scan" onclick="startOCR()" disabled>
+        <i class="fas fa-search"></i> <span id="scan-lbl">เลือกภาพก่อนสแกน</span>
+      </button>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-wrap" id="prog-wrap">
+      <div class="progress-row">
+        <span class="progress-lbl" id="prog-lbl">กำลังประมวลผล...</span>
+        <span class="progress-pct" id="prog-pct">0%</span>
+      </div>
+      <div class="progress-bg"><div class="progress-fill" id="prog-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- ══ RIGHT: TEXT ══ -->
+  <div class="panel-right">
+    <div class="panel-header">
+      <div class="panel-label green">ผลลัพธ์ OCR</div>
+      <div class="panel-actions">
+        <span id="stat-info" style="font-size:11px;color:var(--text3);font-weight:600;margin-right:4px"></span>
+        <button class="btn-sm danger" id="btn-clrout" onclick="clearOutput()" disabled><i class="fas fa-eraser"></i> ล้าง</button>
+      </div>
+    </div>
+
+    <!-- Format row -->
+    <div class="fmt-row">
+      <button class="btn-sm" id="fmt-up" onclick="fmtDo('upper')" disabled>AA</button>
+      <button class="btn-sm" id="fmt-lo" onclick="fmtDo('lower')" disabled>aa</button>
+      <button class="btn-sm" id="fmt-trim" onclick="fmtDo('trim')" disabled><i class="fas fa-cut"></i> ตัดช่อง</button>
+      <button class="btn-sm" id="fmt-dd" onclick="fmtDo('dedup')" disabled><i class="fas fa-clone"></i> ลบซ้ำ</button>
+      <div class="fsep"></div>
+      <span style="font-size:11px;color:var(--text3);font-weight:600">ขนาด</span>
+      <select class="fsel" onchange="chgFont(this.value)">
+        <option value="12">12px</option>
+        <option value="14" selected>14px</option>
+        <option value="16">16px</option>
+        <option value="18">18px</option>
+        <option value="20">20px</option>
+      </select>
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-state" id="empty-state">
+      <div class="empty-ico">📝</div>
+      <div class="empty-txt">ผลลัพธ์จะแสดงที่นี่<br><span style="font-size:12px;color:var(--text3)">อัปโหลดภาพ แล้วกด <b style="color:var(--accent)">สแกน OCR</b></span></div>
+    </div>
+
+    <!-- Editor -->
+    <div class="editor-wrap" id="editor-wrap">
+      <textarea id="output-ta"
+        placeholder="ข้อความที่แปลงได้จะปรากฏที่นี่ สามารถแก้ไขได้โดยตรง..."
+        oninput="updateStats()"></textarea>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-bar">
+      <div class="stat-item"><span class="stat-lbl">อักขระ</span><span class="stat-val" id="s-chars">0</span></div>
+      <div class="stat-sep"></div>
+      <div class="stat-item"><span class="stat-lbl">คำ</span><span class="stat-val" id="s-words">0</span></div>
+      <div class="stat-sep"></div>
+      <div class="stat-item"><span class="stat-lbl">บรรทัด</span><span class="stat-val" id="s-lines">0</span></div>
+      <div class="conf-wrap">
+        <span class="conf-lbl">ความแม่นยำ</span>
+        <div class="conf-bar-bg"><div class="conf-bar-fill" id="conf-fill"></div></div>
+        <span class="conf-lbl" id="conf-val">—</span>
+      </div>
+    </div>
+
+    <!-- Export -->
+    <div class="export-bar">
+      <span class="export-lbl">ส่งออก</span>
+      <button class="btn-sm success" id="exp-copy" onclick="copyText()" disabled><i class="fas fa-copy"></i> คัดลอก</button>
+      <button class="btn-sm" id="exp-txt" onclick="exportTXT()" disabled><i class="fas fa-file-alt"></i> TXT</button>
+      <button class="btn-sm" id="exp-html" onclick="exportHTML()" disabled><i class="fas fa-file-code"></i> HTML</button>
+      <button class="btn-sm" id="exp-md" onclick="exportMD()" disabled><i class="fas fa-file-invoice"></i> Markdown</button>
+      <button class="btn-sm" id="exp-print" onclick="printOut()" disabled><i class="fas fa-print"></i> พิมพ์</button>
+    </div>
+  </div>
+</main>
+
+<!-- STATUS BAR -->
+<div id="statusbar">
+  <span id="st-file">ไม่มีไฟล์</span>
+  <div class="stsp"></div>
+  <span id="st-lang">ภาษา: ไทย + EN</span>
+  <div class="stsp"></div>
+  <span id="st-status">พร้อมใช้งาน</span>
+  <div class="stml">
+    <span id="st-conf">ความแม่นยำ: —</span>
+    <div class="stsp"></div>
+    <span>CNS : Document Scanner &amp; OCR</span>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── State ──
+const S={file:null,rot:0,flipped:false,enhance:false,bw:false,lang:'tha+eng'};
+
+// ── File ──
+document.getElementById('file-inp').addEventListener('change',e=>{
+  if(e.target.files[0]) loadFile(e.target.files[0]);
+});
+
+function loadFile(file){
+  if(!file.type.startsWith('image/')){toast('กรุณาเลือกไฟล์รูปภาพ','err');return;}
+  if(file.size>20*1024*1024){toast('ไฟล์ใหญ่เกิน 20MB','err');return;}
+  S.file=file;S.rot=0;S.flipped=false;S.enhance=false;S.bw=false;
+  document.getElementById('preview-img').src=URL.createObjectURL(file);
+  applyImgCSS();
+  document.getElementById('drop-wrap').style.display='none';
+  document.getElementById('img-preview-wrap').style.display='flex';
+  document.getElementById('btn-clrimg').style.display='flex';
+  // Reset toggle visuals
+  ['btn-enh','btn-bw','btn-flip'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  enableImg(true);
+  document.getElementById('st-file').textContent=file.name;
+  document.getElementById('st-status').textContent='พร้อมสแกน';
+  document.getElementById('scan-lbl').textContent='สแกน OCR';
+  toast('โหลดภาพสำเร็จ — '+file.name,'ok');
+}
+
+function enableImg(on){
+  ['btn-rotl','btn-rotr','btn-flip','btn-enh','btn-bw','btn-scan'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.disabled=!on;
+  });
+}
+function enableOut(on){
+  ['btn-clrout','fmt-up','fmt-lo','fmt-trim','fmt-dd',
+   'exp-copy','exp-txt','exp-html','exp-md','exp-print'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.disabled=!on;
+  });
+}
+
+// ── Drag & Drop ──
+document.body.addEventListener('dragover',e=>{e.preventDefault();document.getElementById('dropzone-hl').classList.add('show')});
+document.body.addEventListener('dragleave',e=>{if(e.relatedTarget===null)document.getElementById('dropzone-hl').classList.remove('show')});
+document.body.addEventListener('drop',e=>{
+  e.preventDefault();document.getElementById('dropzone-hl').classList.remove('show');
+  document.getElementById('drop-zone').classList.remove('dragover');
+  const f=e.dataTransfer.files[0];
+  if(f&&f.type.startsWith('image/'))loadFile(f);
+  else toast('กรุณาวางไฟล์รูปภาพเท่านั้น','err');
+});
+// Drop zone hover
+const dz=document.getElementById('drop-zone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('dragover')});
+dz.addEventListener('dragleave',()=>dz.classList.remove('dragover'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('dragover');const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))loadFile(f);});
+dz.addEventListener('click',()=>document.getElementById('file-inp').click());
+
+// ── Image transforms ──
+function rotImg(deg){S.rot=(S.rot+deg+360)%360;applyImgCSS();}
+function flipImg(){
+  S.flipped=!S.flipped;
+  document.getElementById('btn-flip').classList.toggle('active',S.flipped);
+  applyImgCSS();
+}
+function toggleEnhance(){
+  S.enhance=!S.enhance;
+  document.getElementById('btn-enh').classList.toggle('active',S.enhance);
+  applyImgCSS();
+}
+function toggleBW(){
+  S.bw=!S.bw;
+  document.getElementById('btn-bw').classList.toggle('active',S.bw);
+  applyImgCSS();
+}
+function applyImgCSS(){
+  const img=document.getElementById('preview-img');
+  let f=[];
+  if(S.enhance)f.push('contrast(1.45) brightness(1.05)');
+  if(S.bw)f.push('grayscale(1) contrast(1.2)');
+  img.style.filter=f.join(' ')||'none';
+  img.style.transform=`rotate(${S.rot}deg) scaleX(${S.flipped?-1:1})`;
+}
+
+// ── Language ──
+const langLabel={'tha+eng':'ไทย + EN','tha':'ไทย','eng':'English'};
+function selectLang(el){
+  document.querySelectorAll('.lchip').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');S.lang=el.dataset.lang;
+  document.getElementById('st-lang').textContent='ภาษา: '+langLabel[S.lang];
+}
+
+// ── OCR ──
+async function startOCR(){
+  if(!S.file)return;
+  const sl=document.getElementById('scan-line');
+  const pw=document.getElementById('prog-wrap');
+  const pf=document.getElementById('prog-fill');
+  const pp=document.getElementById('prog-pct');
+  const pl=document.getElementById('prog-lbl');
+  const btn=document.getElementById('btn-scan');
+  btn.disabled=true;
+  document.getElementById('scan-lbl').textContent='กำลังสแกน...';
+  sl.classList.add('show');pw.classList.add('show');pf.style.width='0%';
+  document.getElementById('st-status').textContent='กำลังสแกน...';
+  const statusTH={
+    'loading tesseract core':'โหลด Engine...',
+    'initializing tesseract':'เตรียมระบบ...',
+    'loading language traineddata':'โหลดข้อมูลภาษา...',
+    'initializing api':'เริ่มต้น API...',
+    'recognizing text':'วิเคราะห์ข้อความ...'
+  };
+  try{
+    const canvas=await makeCanvas();
+    const result=await Tesseract.recognize(canvas,S.lang,{
+      logger:m=>{
+        if(statusTH[m.status])pl.textContent=statusTH[m.status];
+        if(m.status==='recognizing text'){
+          const p=Math.round(m.progress*100);
+          pf.style.width=p+'%';pp.textContent=p+'%';
+        }
+      }
+    });
+    const text=result.data.text;
+    const conf=Math.round(result.data.confidence);
+    // Show result
+    document.getElementById('output-ta').value=text;
+    document.getElementById('empty-state').style.display='none';
+    document.getElementById('editor-wrap').classList.add('show');
+    // Confidence
+    const col=conf>70?'var(--success)':conf>40?'var(--warn)':'var(--danger)';
+    document.getElementById('conf-fill').style.width=conf+'%';
+    document.getElementById('conf-fill').style.background=col;
+    document.getElementById('conf-val').textContent=conf+'%';
+    document.getElementById('conf-val').style.color=col;
+    document.getElementById('st-conf').textContent='ความแม่นยำ: '+conf+'%';
+    document.getElementById('st-status').textContent='✓ สแกนสำเร็จ';
+    pf.style.width='100%';pp.textContent='100%';pl.textContent='✓ เสร็จสิ้น';
+    enableOut(true);updateStats();
+    toast('สแกนสำเร็จ! ความแม่นยำ '+conf+'%','ok');
+    setTimeout(()=>pw.classList.remove('show'),3000);
+  }catch(e){
+    console.error(e);
+    pl.textContent='✗ เกิดข้อผิดพลาด';
+    document.getElementById('st-status').textContent='เกิดข้อผิดพลาด';
+    toast('OCR ล้มเหลว: '+e.message,'err');
+  }finally{
+    sl.classList.remove('show');
+    btn.disabled=false;
+    document.getElementById('scan-lbl').textContent='สแกน OCR อีกครั้ง';
+  }
+}
+
+async function makeCanvas(){
+  return new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement('canvas'),ctx=c.getContext('2d');
+      const rad=(S.rot*Math.PI)/180;
+      const sin=Math.abs(Math.sin(rad)),cos=Math.abs(Math.cos(rad));
+      c.width=img.width*cos+img.height*sin;
+      c.height=img.width*sin+img.height*cos;
+      ctx.translate(c.width/2,c.height/2);ctx.rotate(rad);
+      if(S.flipped)ctx.scale(-1,1);
+      let f=[];
+      if(S.enhance)f.push('contrast(1.45) brightness(1.05)');
+      if(S.bw)f.push('grayscale(1)');
+      if(f.length)ctx.filter=f.join(' ');
+      ctx.drawImage(img,-img.width/2,-img.height/2);res(c);
+    };
+    img.src=URL.createObjectURL(S.file);
+  });
+}
+
+// ── Text ops ──
+function updateStats(){
+  const t=document.getElementById('output-ta').value;
+  const ch=t.length,w=t.trim()?t.trim().split(/\s+/).length:0,l=t?t.split('\n').length:0;
+  document.getElementById('s-chars').textContent=ch.toLocaleString();
+  document.getElementById('s-words').textContent=w.toLocaleString();
+  document.getElementById('s-lines').textContent=l.toLocaleString();
+  document.getElementById('stat-info').textContent=ch?`${ch} อักขระ · ${w} คำ`:'';
+}
+function fmtDo(type){
+  const ta=document.getElementById('output-ta');let t=ta.value;if(!t)return;
+  if(type==='upper')t=t.toUpperCase();
+  else if(type==='lower')t=t.toLowerCase();
+  else if(type==='trim')t=t.split('\n').map(l=>l.trim()).join('\n').replace(/\n{3,}/g,'\n\n');
+  else if(type==='dedup'){const s=new Set();t=t.split('\n').filter(l=>{if(s.has(l))return false;s.add(l);return true;}).join('\n');}
+  ta.value=t;updateStats();toast('จัดรูปแบบสำเร็จ','ok');
+}
+function chgFont(s){document.getElementById('output-ta').style.fontSize=s+'px';}
+
+function clearOutput(){
+  document.getElementById('output-ta').value='';
+  document.getElementById('editor-wrap').classList.remove('show');
+  document.getElementById('empty-state').style.display='flex';
+  document.getElementById('conf-fill').style.width='0%';
+  document.getElementById('conf-val').textContent='—';
+  document.getElementById('conf-val').style.color='';
+  document.getElementById('st-conf').textContent='ความแม่นยำ: —';
+  enableOut(false);updateStats();
+}
+
+function clearAll(){
+  clearOutput();S.file=null;
+  document.getElementById('preview-img').src='';
+  document.getElementById('drop-wrap').style.display='flex';
+  document.getElementById('img-preview-wrap').style.display='none';
+  document.getElementById('btn-clrimg').style.display='none';
+  ['btn-enh','btn-bw','btn-flip'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  enableImg(false);
+  document.getElementById('st-file').textContent='ไม่มีไฟล์';
+  document.getElementById('st-status').textContent='พร้อมใช้งาน';
+  document.getElementById('scan-lbl').textContent='เลือกภาพก่อนสแกน';
+  document.getElementById('prog-wrap').classList.remove('show');
+}
+
+// ── Export ──
+const getT=()=>document.getElementById('output-ta').value;
+function copyText(){
+  if(!getT())return;
+  navigator.clipboard.writeText(getT()).then(()=>{
+    const b=document.getElementById('exp-copy');
+    const orig=b.innerHTML;b.innerHTML='<i class="fas fa-check"></i> คัดลอกแล้ว';
+    setTimeout(()=>b.innerHTML=orig,2000);
+    toast('คัดลอกข้อความแล้ว','ok');
+  });
+}
+function exportTXT(){
+  if(!getT())return;
+  dl(new Blob([getT()],{type:'text/plain;charset=utf-8'}),'ocr-output.txt');
+  toast('ดาวน์โหลด TXT สำเร็จ','ok');
+}
+function exportHTML(){
+  if(!getT())return;
+  const e=getT().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const h=`<!DOCTYPE html>\n<html lang="th">\n<head>\n<meta charset="UTF-8">\n<title>OCR Output</title>\n<style>body{font-family:'Sarabun','Noto Sans Thai',sans-serif;max-width:800px;margin:40px auto;padding:0 24px;font-size:16px;line-height:1.9;color:#1e293b}h1{font-size:18px;color:#0046be;border-bottom:2px solid #0046be;padding-bottom:8px;margin-bottom:20px}pre{white-space:pre-wrap;word-wrap:break-word}</style>\n</head>\n<body>\n<h1>📄 ผลลัพธ์ OCR — CNS Document Scanner</h1>\n<pre>${e}</pre>\n</body></html>`;
+  dl(new Blob([h],{type:'text/html;charset=utf-8'}),'ocr-output.html');
+  toast('ดาวน์โหลด HTML สำเร็จ','ok');
+}
+function exportMD(){
+  if(!getT())return;
+  const m=`# ผลลัพธ์ OCR\n\n> สร้างโดย CNS Document Scanner & OCR  \n> วันที่: ${new Date().toLocaleDateString('th-TH')}  \n> ภาษา: ${langLabel[S.lang]}\n\n---\n\n${getT()}`;
+  dl(new Blob([m],{type:'text/markdown;charset=utf-8'}),'ocr-output.md');
+  toast('ดาวน์โหลด Markdown สำเร็จ','ok');
+}
+function printOut(){
+  if(!getT())return;
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:'Sarabun',sans-serif;font-size:14px;line-height:1.9;padding:32px;white-space:pre-wrap;color:#1e293b}</style></head><body>${getT().replace(/</g,'&lt;').replace(/>/g,'&gt;')}</body></html>`);
+  w.document.close();w.print();
+}
+function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href);}
+
+// ── Theme ──
+function toggleTheme(){
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
+  document.documentElement.setAttribute('data-theme',dark?'':'dark');
+  localStorage.setItem('cns_ocr_theme',dark?'':'dark');
+  document.getElementById('theme-icon').className=dark?'fas fa-moon':'fas fa-sun';
+}
+if(document.documentElement.getAttribute('data-theme')==='dark'){
+  document.getElementById('theme-icon').className='fas fa-sun';
+}
+
+// ── Toast ──
+let _tt=null;
+function toast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='show'+(type?' '+type:'');
+  clearTimeout(_tt);_tt=setTimeout(()=>t.className='',3000);
+}
+
+// ── Keyboard ──
+document.addEventListener('keydown',e=>{
+  if(['textarea','input'].includes(document.activeElement.tagName.toLowerCase()))return;
+  const c=e.ctrlKey||e.metaKey;
+  if(c&&e.key==='o'){e.preventDefault();document.getElementById('file-inp').click();}
+  if(c&&e.key==='s'){e.preventDefault();exportTXT();}
+});
+</script>
+</body>
+</html>
